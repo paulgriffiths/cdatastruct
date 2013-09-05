@@ -19,7 +19,7 @@ SAMPLEOUT=sample
 INC_INSTALL_PREFIX=paulgrif
 INC_INSTALL_PATH=$(HOME)/include/$(INC_INSTALL_PREFIX)
 LIB_INSTALL_PATH=$(HOME)/lib/c
-INSTALLHEADERS=
+INSTALLHEADERS=cdatastruct.h cds_common.h cds_general.h cds_sl_list.h
 
 # Compiler and archiver executable names
 AR=ar
@@ -29,7 +29,7 @@ CC=gcc
 ARFLAGS=rcs
 
 # Compiler flags
-CFLAGS=-ansi -pedantic -Wall -Wextra
+CFLAGS=-std=c99 -pedantic -Wall -Wextra
 C_DEBUG_FLAGS=-ggdb -DDEBUG -DDEBUG_ALL
 C_RELEASE_FLAGS=-O3 -DNDEBUG
 
@@ -37,7 +37,7 @@ C_RELEASE_FLAGS=-O3 -DNDEBUG
 LDFLAGS=
 
 # Object code files
-OBJS=mainlib.o
+OBJS=general.o sl_list.o
 
 # Source and clean files and globs
 SRCS=$(wildcard *.c *.h)
@@ -82,7 +82,7 @@ install:
 
 # sample - makes sample program
 .PHONY: sample
-sample: LDFLAGS+=-l$(LIBNAME)
+sample: LDFLAGS+=-l$(LIBNAME) -lchelpers
 sample: main.o
 	@echo "Linking sample program..."
 	@$(CC) -o $(SAMPLEOUT) main.o $(LDFLAGS)
@@ -137,6 +137,10 @@ main.o: main.c
 
 # Object files for library
 
-mainlib.o: mainlib.c mainlib.h
+general.o: general.c cds_general.h
+	@echo "Compiling $<..."
+	@$(CC) $(CFLAGS) -c -o $@ $<
+
+sl_list.o: sl_list.c cds_sl_list.h cds_common.h
 	@echo "Compiling $<..."
 	@$(CC) $(CFLAGS) -c -o $@ $<
