@@ -7,6 +7,7 @@
  */
 
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <paulgrif/chelpers.h>
@@ -207,20 +208,9 @@ int dl_list_insert_before(dl_list list, const dl_list_itr itr, void * data) {
  */
 
 int dl_list_find_index(const dl_list list, const void * data) {
-    dl_list_node node = list->front;
     int index = 0;
-    bool found = false;
-
-    while ( node && !found ) {
-        if ( list->cfunc(node->data, data) == 0 ) {
-            found = true;
-        } else {
-            node = node->next;
-            ++index;
-        }
-    }
-
-    return found ? index : CDSERR_NOTFOUND;
+    dl_list_find(list, data, NULL, &index);
+    return index;
 }
 
 
@@ -233,19 +223,8 @@ int dl_list_find_index(const dl_list list, const void * data) {
  */
 
 dl_list_itr dl_list_find_itr(const dl_list list, const void * data) {
-    dl_list_itr itr = list->front;
-    int index = 0;
-    bool found = false;
-
-    while ( itr && !found ) {
-        if ( list->cfunc(itr->data, data) == 0 ) {
-            found = true;
-        } else {
-            itr = itr->next;
-            ++index;
-        }
-    }
-
+    dl_list_itr itr;
+    dl_list_find(list, data, &itr, NULL);
     return itr;
 }
 
@@ -352,6 +331,44 @@ dl_list_itr dl_list_index(const dl_list list, const size_t index) {
     }
 
     return element;
+}
+
+
+/*!
+ * \brief           Finds the index of the specified data in a list.
+ * \param list      A pointer to the list.
+ * \param data      A pointer to the data to find.
+ * \returns         The index of the element, if found, or CDSERR_NOTFOUND
+ * if it is not in the list.
+ */
+
+void dl_list_find(const dl_list list, const void * data,
+                 dl_list_itr * p_itr, int * p_index) {
+    dl_list_node node = list->front;
+    int index = 0;
+    bool found = false;
+
+    if ( list->cfunc == NULL ) {
+        fputs("cdatastruct error: compare function not provided.", stderr);
+        exit(EXIT_FAILURE);
+    }
+
+    while ( node && !found ) {
+        if ( list->cfunc(node->data, data) == 0 ) {
+            found = true;
+        } else {
+            node = node->next;
+            ++index;
+        }
+    }
+
+    if ( p_itr ) {
+        *p_itr = node;
+    }
+
+    if ( p_index ) {
+        *p_index = found ? index : CDSERR_NOTFOUND;
+    }
 }
 
 
