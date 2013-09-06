@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(dl_list_append_test) {
     dl_list_free(list);
 }
 
-BOOST_AUTO_TEST_CASE(dl_list_index_test) {
+BOOST_AUTO_TEST_CASE(dl_list_itr_from_index_test) {
     dl_list list = dl_list_init(cds_compare_uint);
     const unsigned int elems[] = {4, 9, 16, 25, 36, 49};
     for ( size_t i = 0; i < 6; ++i ) {
@@ -69,22 +69,22 @@ BOOST_AUTO_TEST_CASE(dl_list_index_test) {
     BOOST_CHECK(dl_list_length(list) == 6);
     BOOST_CHECK(dl_list_isempty(list) == false);
 
-    dl_list_itr itr = dl_list_index(list, 0);
+    dl_list_itr itr = dl_list_itr_from_index(list, 0);
     BOOST_CHECK_EQUAL(4, *((unsigned int *) itr->data));
 
-    itr = dl_list_index(list, 1);
+    itr = dl_list_itr_from_index(list, 1);
     BOOST_CHECK_EQUAL(9, *((unsigned int *) itr->data));
 
-    itr = dl_list_index(list, 2);
+    itr = dl_list_itr_from_index(list, 2);
     BOOST_CHECK_EQUAL(16, *((unsigned int *) itr->data));
 
-    itr = dl_list_index(list, 3);
+    itr = dl_list_itr_from_index(list, 3);
     BOOST_CHECK_EQUAL(25, *((unsigned int *) itr->data));
 
-    itr = dl_list_index(list, 4);
+    itr = dl_list_itr_from_index(list, 4);
     BOOST_CHECK_EQUAL(36, *((unsigned int *) itr->data));
 
-    itr = dl_list_index(list, 5);
+    itr = dl_list_itr_from_index(list, 5);
     BOOST_CHECK_EQUAL(49, *((unsigned int *) itr->data));
 
     dl_list_free(list);
@@ -206,7 +206,7 @@ BOOST_AUTO_TEST_CASE(dl_list_find_insert_itr_test) {
     BOOST_CHECK_EQUAL(36, *((int *) dl_list_data(list, 5)));
     BOOST_CHECK_EQUAL(49, *((int *) dl_list_data(list, 6)));
 
-    itr = dl_list_index(list, 5);
+    itr = dl_list_itr_from_index(list, 5);
     BOOST_CHECK_EQUAL(36, *((long *) itr->data));
     dl_list_free(list);
 }
