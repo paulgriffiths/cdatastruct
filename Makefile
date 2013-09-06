@@ -21,6 +21,7 @@ INC_INSTALL_PREFIX=paulgrif
 INC_INSTALL_PATH=$(HOME)/include/$(INC_INSTALL_PREFIX)
 LIB_INSTALL_PATH=$(HOME)/lib/c
 INSTALLHEADERS=cdatastruct.h cds_common.h cds_general.h cds_sl_list.h
+INSTALLHEADERS+=cds_stack.h
 
 # Compiler and archiver executable names
 AR=ar
@@ -46,10 +47,11 @@ LD_TEST_FLAGS+=-lstdc++
 LD_TEST_FLAGS+=-l$(LIBNAME) -L$(CURDIR) -lchelpers
 
 # Object code files
-OBJS=general.o sl_list.o
+OBJS=general.o sl_list.o stack.o
 
 TESTOBJS=tests/test_main.o
 TESTOBJS+=tests/test_sl_list.o
+TESTOBJS+=tests/test_stack.o
 
 # Source and clean files and globs
 SRCS=$(wildcard *.c *.h)
@@ -60,6 +62,7 @@ SRCGLOB+=tests/*.cpp
 
 CLNGLOB=$(OUT) $(TESTOUT) $(SAMPLEOUT)
 CLNGLOB+=*~ *.o *.gcov *.out *.gcda *.gcno
+CLNGLOB+=tests/*~ tests/*.o tests/*.gcov tests/*.out tests/*.gcda tests/*.gcno
 
 
 # Build targets section
@@ -159,7 +162,11 @@ general.o: general.c cds_general.h cds_common.h
 	@echo "Compiling $<..."
 	@$(CC) $(CFLAGS) -c -o $@ $<
 
-sl_list.o: sl_list.c cds_sl_list.h cds_common.h
+sl_list.o: sl_list.c cds_sl_list.h sl_list.h cds_common.h
+	@echo "Compiling $<..."
+	@$(CC) $(CFLAGS) -c -o $@ $<
+
+stack.o: stack.c cds_stack.h sl_list.h cds_sl_list.h cds_common.h
 	@echo "Compiling $<..."
 	@$(CC) $(CFLAGS) -c -o $@ $<
 
@@ -170,6 +177,10 @@ tests/test_main.o: tests/test_main.cpp
 	@$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 tests/test_sl_list.o: tests/test_sl_list.cpp
+	@echo "Compiling $<..."
+	@$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+tests/test_stack.o: tests/test_stack.cpp
 	@echo "Compiling $<..."
 	@$(CXX) $(CXXFLAGS) -c -o $@ $<
 
