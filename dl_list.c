@@ -335,11 +335,14 @@ dl_list_itr dl_list_index(const dl_list list, const size_t index) {
 
 
 /*!
- * \brief           Finds the index of the specified data in a list.
+ * \brief           Finds the index of, and a pointer to, the first
+ * node in the list containing the specified data.
  * \param list      A pointer to the list.
  * \param data      A pointer to the data to find.
- * \returns         The index of the element, if found, or CDSERR_NOTFOUND
- * if it is not in the list.
+ * \param p_itr     A pointer to an iterator to populate with the result.
+ * This is set to CDSERR_NOTFOUND if the data was not found.
+ * \param p_index   A pointer to an integer the populate with the result.
+ * This is set to NULL if the data was not found.
  */
 
 void dl_list_find(const dl_list list, const void * data,
@@ -405,40 +408,17 @@ dl_list_node dl_list_remove_at(dl_list list, const size_t index) {
         return NULL;
     }
 
-    dl_list_node itr = list->front;
+    dl_list_node rem_node;
+
     if ( index == 0 ) {
-        dl_list_node new_front = itr->next;
-        list->front = new_front;
-        if ( new_front ) {
-            new_front->prev = NULL;
-        } else {
-            list->back = new_front;
-        }
-        list->front = new_front;
+        rem_node = dl_list_remove_node_front(list);
+    } else if ( index == list->length - 1 ) {
+        rem_node = dl_list_remove_node_back(list);
     } else {
-        size_t i = index;
-        dl_list_node before = itr;
-        itr = itr->next;
-
-        while ( --i ) {
-            before = itr;
-            itr = itr->next;
-        }
-
-        dl_list_node after = itr->next;
-        before->next = after;
-        if ( after ) {
-            after->prev = before;
-        } else {
-            list->back = before;
-        }
+        rem_node = dl_list_remove_node_mid(list, dl_list_index(list, index));
     }
 
-    itr->next = NULL;
-    itr->prev = NULL;
-    --list->length;
-
-    return itr;
+    return rem_node;
 }
 
 
@@ -525,6 +505,88 @@ void dl_list_insert_node_after_mid(dl_list list,
     before->next = node;
     after->prev = node;
     ++list->length;
+}
+
+
+/*!
+ * \brief           Removes the first node of a list.
+ * \param list      A pointer to the list.
+ * \returns         A pointer to the removed node.
+ */
+
+dl_list_node dl_list_remove_node_front(dl_list list) {
+    dl_list_node removed_node;
+    if ( dl_list_isempty(list) ) {
+        removed_node = NULL;
+    } else {
+        removed_node = list->front;
+        dl_list_node new_front = removed_node->next;
+        list->front = new_front;
+
+        if ( new_front ) {
+            new_front->prev = NULL;
+        } else {
+            list->back = NULL;
+        }
+
+        removed_node->prev = NULL;
+        removed_node->next = NULL;
+        --list->length;
+    }
+
+    return removed_node;
+}
+
+
+/*!
+ * \brief           Removes the last node of a list.
+ * \param list      A pointer to the list.
+ * \returns         A pointer to the removed node.
+ */
+
+dl_list_node dl_list_remove_node_back(dl_list list) {
+    dl_list_node removed_node;
+    if ( dl_list_isempty(list) ) {
+        removed_node = NULL;
+    } else {
+        removed_node = list->back;
+        dl_list_node new_back = removed_node->prev;
+        list->back = new_back;
+
+        if ( new_back ) {
+            new_back->next = NULL;
+        } else {
+            list->front = NULL;
+        }
+
+        removed_node->prev = NULL;
+        removed_node->next = NULL;
+        --list->length;
+    }
+
+    return removed_node;
+}
+
+
+/*!
+ * \brief           Removes a specifed node from the middle of a list.
+ * \param list      A pointer to the list.
+ * \param node      A pointer to the node to remove. As this is
+ * removing from the middle, this node should not be either the front
+ * or the back of the list, i.e. both the `prev` and `next` members
+ * should be non-NULL.
+ * \returns         A pointer to the removed node, i.e. equal to `itr`.
+ */
+
+dl_list_node dl_list_remove_node_mid(dl_list list, dl_list_node node) {
+    dl_list_node before = node->prev;
+    dl_list_node after = node->next;
+    node->prev = NULL;
+    node->next = NULL;
+    before->next = after;
+    after->prev = before;
+    --list->length;
+    return node;
 }
 
 
