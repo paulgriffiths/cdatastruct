@@ -10,8 +10,16 @@
 #ifndef PG_CDS_COMMON_H
 #define PG_CDS_COMMON_H
 
+
+/*!
+ * \brief           Enumeration of return error codes.
+ */
+
 typedef enum cds_error {
-    CDSERR_OUTOFRANGE
+    CDSERR_ERROR = -1,          /*!< Unspecified error */
+    CDSERR_OUTOFRANGE = -2,     /*!< Index out of range */
+    CDSERR_NOTFOUND = -3,       /*!< Data element not found */
+    CDSERR_BADITERATOR = -4     /*!< Invalid iterator */
 } cds_error;
 
 #endif          /*  PG_CDS_COMMON_H  */

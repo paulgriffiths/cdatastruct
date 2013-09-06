@@ -1,13 +1,14 @@
 # Doxygen configuration file for cdatastruct project
 
 PROJECT_NAME="cdatastruct"
-#PROJECT_BRIEF=""
+PROJECT_BRIEF="A library of generic C language data structures"
 OUTPUT_LANGUAGE=English
 OPTIMIZE_OUTPUT_FOR_C=YES
 #EXTRACT_ALL=YES
 #EXTRACT_STATIC=YES
 INPUT=./
 FILE_PATTERNS=*.c *.h
+EXCLUDE=main.c
 GENERATE_HTML=YES
 REPEAT_BRIEF=NO
 HAVE_DOT=YES

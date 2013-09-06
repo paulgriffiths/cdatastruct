@@ -13,6 +13,7 @@
 # Library and executable names
 LIBNAME=cdatastruct
 OUT=lib$(LIBNAME).a
+TESTOUT=unittests
 SAMPLEOUT=sample
 
 # Install paths and header files to deploy
@@ -24,6 +25,7 @@ INSTALLHEADERS=cdatastruct.h cds_common.h cds_general.h cds_sl_list.h
 # Compiler and archiver executable names
 AR=ar
 CC=gcc
+CXX=g++
 
 # Archiver flags
 ARFLAGS=rcs
@@ -32,19 +34,31 @@ ARFLAGS=rcs
 CFLAGS=-std=c99 -pedantic -Wall -Wextra
 C_DEBUG_FLAGS=-ggdb -DDEBUG -DDEBUG_ALL
 C_RELEASE_FLAGS=-O3 -DNDEBUG
+CXXFLAGS=-std=c++11 -pedantic -Wall -Wextra -Weffc++
+CXX_TEST_FLAGS=-std=c++11 -pedantic -Wall -Wextra
+CXX_DEBUG_FLAGS=-ggdb -DDEBUG -DDEBUG_ALL
+CXX_RELEASE_FLAGS=-O3 -DNDEBUG
 
 # Linker flags
 LDFLAGS=
+LD_TEST_FLAGS=-lboost_system -lboost_thread -lboost_unit_test_framework
+LD_TEST_FLAGS+=-lstdc++
+LD_TEST_FLAGS+=-l$(LIBNAME) -L$(CURDIR) -lchelpers
 
 # Object code files
 OBJS=general.o sl_list.o
 
+TESTOBJS=tests/test_main.o
+TESTOBJS+=tests/test_sl_list.o
+
 # Source and clean files and globs
 SRCS=$(wildcard *.c *.h)
+SRCS=$(wildcard tests/*.cpp)
 
 SRCGLOB=*.c
+SRCGLOB+=tests/*.cpp
 
-CLNGLOB=$(OUT) $(SAMPLEOUT)
+CLNGLOB=$(OUT) $(TESTOUT) $(SAMPLEOUT)
 CLNGLOB+=*~ *.o *.gcov *.out *.gcda *.gcno
 
 
@@ -65,7 +79,7 @@ release: main
 
 # tests - builds unit tests
 .PHONY: tests
-tests: CFLAGS+=$(C_TEST_FLAGS)
+tests: CXXFLAGS=$(CXX_TEST_FLAGS)
 tests: LDFLAGS+=$(LD_TEST_FLAGS)
 tests: testmain
 
@@ -124,6 +138,10 @@ main: $(OBJS)
 	@$(AR) $(ARFLAGS) $(OUT) $(OBJS)
 	@echo "Done."
 
+# Unit tests executable
+testmain: $(TESTOBJS)
+	@echo "Linking unit tests..."
+	@$(CXX) -o $(TESTOUT) $(TESTOBJS) $(LDFLAGS)
 
 # Object files targets section
 # ============================
@@ -137,10 +155,21 @@ main.o: main.c
 
 # Object files for library
 
-general.o: general.c cds_general.h
+general.o: general.c cds_general.h cds_common.h
 	@echo "Compiling $<..."
 	@$(CC) $(CFLAGS) -c -o $@ $<
 
 sl_list.o: sl_list.c cds_sl_list.h cds_common.h
 	@echo "Compiling $<..."
 	@$(CC) $(CFLAGS) -c -o $@ $<
+
+# Unit tests
+
+tests/test_main.o: tests/test_main.cpp
+	@echo "Compiling $<..."
+	@$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+tests/test_sl_list.o: tests/test_sl_list.cpp
+	@echo "Compiling $<..."
+	@$(CXX) $(CXXFLAGS) -c -o $@ $<
+
