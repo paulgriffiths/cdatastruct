@@ -15,6 +15,7 @@
 #include "cds_common.h"
 #include "cds_general.h"
 #include "cds_sl_list.h"
+#include "cds_dl_list.h"
 #include "cds_stack.h"
 
 
