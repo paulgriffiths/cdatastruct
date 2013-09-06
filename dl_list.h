@@ -39,23 +39,27 @@ typedef struct dl_list_node_t * dl_list_node;
 extern "C" {
 #endif
 
+dl_list_node dl_list_new_node(void * data);
+void dl_list_free_node(dl_list_node node);
+
 void dl_list_insert_node_front(dl_list list, dl_list_node node);
-void dl_list_insert_node_back(dl_list list, dl_list_node node);
 void dl_list_insert_node_before_mid(dl_list list,
         dl_list_itr itr, dl_list_node node);
 void dl_list_insert_node_after_mid(dl_list list,
         dl_list_itr itr, dl_list_node node);
-dl_list_node dl_list_remove_node_front(dl_list list);
-dl_list_node dl_list_remove_node_back(dl_list list);
-dl_list_node dl_list_remove_node_mid(dl_list list, dl_list_itr itr);
+void dl_list_insert_node_back(dl_list list, dl_list_node node);
+
 dl_list_node dl_list_remove_at(dl_list list, const size_t index);
-dl_list_node dl_list_new_node(void * data);
+dl_list_node dl_list_remove_node_front(dl_list list);
+dl_list_node dl_list_remove_node_mid(dl_list list, dl_list_itr itr);
+dl_list_node dl_list_remove_node_back(dl_list list);
+
 void dl_list_find(const dl_list list, const void * data,
                  dl_list_itr * p_itr, int * p_index);
-void dl_list_free_node(dl_list_node node);
 
 #ifdef __cplusplus
 }
 #endif
+
 
 #endif          /*  PG_CDS_DOUBLY_LINKED_LIST_DEV_H  */

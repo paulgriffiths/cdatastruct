@@ -101,6 +101,33 @@ void dl_list_append(dl_list list, void * data) {
 
 
 /*!
+ * \brief           Inserts an element before a provided iterator.
+ * \param list      A pointer to the list.
+ * \param itr       The iterator after which to insert.
+ * \param data      A pointer to the data to add. The memory pointed
+ * to by this parameter must be dynamically allocated, as an attempt
+ * will be made to `free()` it when deleting the list.
+ * \returns         0 on success, CDSERR_BADITERATOR if `itr` is a
+ * NULL pointer.
+ */
+
+int dl_list_insert_before(dl_list list, const dl_list_itr itr, void * data) {
+    if ( itr == NULL ) {
+        return CDSERR_BADITERATOR;
+    }
+
+    dl_list_node new_node = dl_list_new_node(data);
+    if ( itr->prev ) {
+        dl_list_insert_node_before_mid(list, itr, new_node);
+    } else {
+        dl_list_insert_node_front(list, new_node);
+    }
+
+    return 0;
+}
+
+
+/*!
  * \brief           Inserts an element at the specified index of a list.
  * \param list      A pointer to the list.
  * \param index     The index at which to insert. Setting this equal
@@ -125,7 +152,7 @@ int dl_list_insert_at(dl_list list, const size_t index, void * data) {
     } else if ( index == list->length ) {
         dl_list_insert_node_back(list, new_node);
     } else {
-        dl_list_node after = dl_list_index(list, index);
+        dl_list_node after = dl_list_itr_from_index(list, index);
         dl_list_insert_node_before_mid(list, after, new_node);
     }
 
@@ -173,28 +200,21 @@ int dl_list_insert_after(dl_list list, const dl_list_itr itr, void * data) {
 
 
 /*!
- * \brief           Inserts an element before a provided iterator.
+ * \brief           Deletes a list element at a specified index.
  * \param list      A pointer to the list.
- * \param itr       The iterator after which to insert.
- * \param data      A pointer to the data to add. The memory pointed
- * to by this parameter must be dynamically allocated, as an attempt
- * will be made to `free()` it when deleting the list.
- * \returns         0 on success, CDSERR_BADITERATOR if `itr` is a
- * NULL pointer.
+ * \param index     The index of the element to delete.
+ * \returns         0 on success, CDSERR_OUTOFRANGE if the the index
+ * is out of range.
  */
 
-int dl_list_insert_before(dl_list list, const dl_list_itr itr, void * data) {
-    if ( itr == NULL ) {
-        return CDSERR_BADITERATOR;
+int dl_list_delete_at(dl_list list, const size_t index) {
+    dl_list_node rm_node = dl_list_remove_at(list, index);
+
+    if ( rm_node == NULL ) {
+        return CDSERR_OUTOFRANGE;
     }
 
-    dl_list_node new_node = dl_list_new_node(data);
-    if ( itr->prev ) {
-        dl_list_insert_node_before_mid(list, itr, new_node);
-    } else {
-        dl_list_insert_node_front(list, new_node);
-    }
-
+    dl_list_free_node(rm_node);
     return 0;
 }
 
@@ -238,7 +258,7 @@ dl_list_itr dl_list_find_itr(const dl_list list, const void * data) {
  */
 
 void * dl_list_data(const dl_list list, const size_t index) {
-    dl_list_itr itr = dl_list_index(list, index);
+    dl_list_itr itr = dl_list_itr_from_index(list, index);
     return itr ? itr->data : NULL;
 }
 
@@ -294,7 +314,7 @@ dl_list_itr dl_list_prev(const dl_list_itr itr) {
  * \returns         The iterator, or NULL if `index` is out of range.
  */
 
-dl_list_itr dl_list_index(const dl_list list, const size_t index) {
+dl_list_itr dl_list_itr_from_index(const dl_list list, const size_t index) {
     if ( index >= list->length ) {
         return NULL;
     }
@@ -335,90 +355,28 @@ dl_list_itr dl_list_index(const dl_list list, const size_t index) {
 
 
 /*!
- * \brief           Finds the index of, and a pointer to, the first
- * node in the list containing the specified data.
- * \param list      A pointer to the list.
- * \param data      A pointer to the data to find.
- * \param p_itr     A pointer to an iterator to populate with the result.
- * This is set to CDSERR_NOTFOUND if the data was not found.
- * \param p_index   A pointer to an integer the populate with the result.
- * This is set to NULL if the data was not found.
+ * \brief           Creates a new list node.
+ * \param data      The data for the new node.
+ * \returns         A pointer to the newly created node.
  */
 
-void dl_list_find(const dl_list list, const void * data,
-                 dl_list_itr * p_itr, int * p_index) {
-    dl_list_node node = list->front;
-    int index = 0;
-    bool found = false;
-
-    if ( list->cfunc == NULL ) {
-        fputs("cdatastruct error: compare function not provided.", stderr);
-        exit(EXIT_FAILURE);
-    }
-
-    while ( node && !found ) {
-        if ( list->cfunc(node->data, data) == 0 ) {
-            found = true;
-        } else {
-            node = node->next;
-            ++index;
-        }
-    }
-
-    if ( p_itr ) {
-        *p_itr = node;
-    }
-
-    if ( p_index ) {
-        *p_index = found ? index : CDSERR_NOTFOUND;
-    }
+dl_list_node dl_list_new_node(void * data) {
+    dl_list_node new_node = term_malloc(sizeof(*new_node));
+    new_node->data = data;
+    new_node->next = NULL;
+    new_node->prev = NULL;
+    return new_node;
 }
 
 
 /*!
- * \brief           Deletes a list element at a specified index.
- * \param list      A pointer to the list.
- * \param index     The index of the element to delete.
- * \returns         0 on success, CDSERR_OUTOFRANGE if the the index
- * is out of range.
+ * \brief           Frees resources for a node and any data.
+ * \param node      A pointer to the node to free.
  */
 
-int dl_list_delete_at(dl_list list, const size_t index) {
-    dl_list_node rm_node = dl_list_remove_at(list, index);
-
-    if ( rm_node == NULL ) {
-        return CDSERR_OUTOFRANGE;
-    }
-
-    dl_list_free_node(rm_node);
-    return 0;
-}
-
-
-/*!
- * \brief           Removes, but does not delete, an element at an index.
- * \param list      A pointer to the list.
- * \param index     The index of the element to be removed.
- * \returns         A pointer to the removed node. This should be
- * `free()`d by calling dl_list_free_node().
- */
-
-dl_list_node dl_list_remove_at(dl_list list, const size_t index) {
-    if ( index >= list->length ) {
-        return NULL;
-    }
-
-    dl_list_node rem_node;
-
-    if ( index == 0 ) {
-        rem_node = dl_list_remove_node_front(list);
-    } else if ( index == list->length - 1 ) {
-        rem_node = dl_list_remove_node_back(list);
-    } else {
-        rem_node = dl_list_remove_node_mid(list, dl_list_index(list, index));
-    }
-
-    return rem_node;
+void dl_list_free_node(dl_list_node node) {
+    free(node->data);
+    free(node);
 }
 
 
@@ -435,26 +393,6 @@ void dl_list_insert_node_front(dl_list list, dl_list_node node) {
         node->prev = NULL;
         node->next = old_front;
         old_front->prev = node;
-    } else {
-        list->front = list->back = node;
-    }
-    ++list->length;
-}
-
-
-/*!
- * \brief           Inserts a node at the back of a list.
- * \param list      A pointer to the list.
- * \param node      A pointer to the node to insert.
- */
-
-void dl_list_insert_node_back(dl_list list, dl_list_node node) {
-    if ( list->back ) {
-        dl_list_node old_back = list->back;
-        list->back = node;
-        node->prev = old_back;
-        node->next = NULL;
-        old_back->next = node;
     } else {
         list->front = list->back = node;
     }
@@ -509,6 +447,54 @@ void dl_list_insert_node_after_mid(dl_list list,
 
 
 /*!
+ * \brief           Inserts a node at the back of a list.
+ * \param list      A pointer to the list.
+ * \param node      A pointer to the node to insert.
+ */
+
+void dl_list_insert_node_back(dl_list list, dl_list_node node) {
+    if ( list->back ) {
+        dl_list_node old_back = list->back;
+        list->back = node;
+        node->prev = old_back;
+        node->next = NULL;
+        old_back->next = node;
+    } else {
+        list->front = list->back = node;
+    }
+    ++list->length;
+}
+
+
+/*!
+ * \brief           Removes, but does not delete, an element at an index.
+ * \param list      A pointer to the list.
+ * \param index     The index of the element to be removed.
+ * \returns         A pointer to the removed node. This should be
+ * `free()`d by calling dl_list_free_node().
+ */
+
+dl_list_node dl_list_remove_at(dl_list list, const size_t index) {
+    if ( index >= list->length ) {
+        return NULL;
+    }
+
+    dl_list_node rem_node;
+
+    if ( index == 0 ) {
+        rem_node = dl_list_remove_node_front(list);
+    } else if ( index == list->length - 1 ) {
+        rem_node = dl_list_remove_node_back(list);
+    } else {
+        rem_node = dl_list_remove_node_mid(list,
+                dl_list_itr_from_index(list, index));
+    }
+
+    return rem_node;
+}
+
+
+/*!
  * \brief           Removes the first node of a list.
  * \param list      A pointer to the list.
  * \returns         A pointer to the removed node.
@@ -525,36 +511,6 @@ dl_list_node dl_list_remove_node_front(dl_list list) {
             new_front->prev = NULL;
         } else {
             list->back = NULL;
-        }
-
-        removed_node->prev = NULL;
-        removed_node->next = NULL;
-        --list->length;
-    } else {
-        removed_node = NULL;
-    }
-
-    return removed_node;
-}
-
-
-/*!
- * \brief           Removes the last node of a list.
- * \param list      A pointer to the list.
- * \returns         A pointer to the removed node.
- */
-
-dl_list_node dl_list_remove_node_back(dl_list list) {
-    dl_list_node removed_node;
-    if ( list->back ) {
-        removed_node = list->back;
-        dl_list_node new_back = removed_node->prev;
-        list->back = new_back;
-
-        if ( new_back ) {
-            new_back->next = NULL;
-        } else {
-            list->front = NULL;
         }
 
         removed_node->prev = NULL;
@@ -591,26 +547,71 @@ dl_list_node dl_list_remove_node_mid(dl_list list, dl_list_node node) {
 
 
 /*!
- * \brief           Creates a new list node.
- * \param data      The data for the new node.
- * \returns         A pointer to the newly created node.
+ * \brief           Removes the last node of a list.
+ * \param list      A pointer to the list.
+ * \returns         A pointer to the removed node.
  */
 
-dl_list_node dl_list_new_node(void * data) {
-    dl_list_node new_node = term_malloc(sizeof(*new_node));
-    new_node->data = data;
-    new_node->next = NULL;
-    new_node->prev = NULL;
-    return new_node;
+dl_list_node dl_list_remove_node_back(dl_list list) {
+    dl_list_node removed_node;
+    if ( list->back ) {
+        removed_node = list->back;
+        dl_list_node new_back = removed_node->prev;
+        list->back = new_back;
+
+        if ( new_back ) {
+            new_back->next = NULL;
+        } else {
+            list->front = NULL;
+        }
+
+        removed_node->prev = NULL;
+        removed_node->next = NULL;
+        --list->length;
+    } else {
+        removed_node = NULL;
+    }
+
+    return removed_node;
 }
 
 
 /*!
- * \brief           Frees resources for a node and any data.
- * \param node      A pointer to the node to free.
+ * \brief           Finds the index of, and a pointer to, the first
+ * node in the list containing the specified data.
+ * \param list      A pointer to the list.
+ * \param data      A pointer to the data to find.
+ * \param p_itr     A pointer to an iterator to populate with the result.
+ * This is set to CDSERR_NOTFOUND if the data was not found.
+ * \param p_index   A pointer to an integer the populate with the result.
+ * This is set to NULL if the data was not found.
  */
 
-void dl_list_free_node(dl_list_node node) {
-    free(node->data);
-    free(node);
+void dl_list_find(const dl_list list, const void * data,
+                 dl_list_itr * p_itr, int * p_index) {
+    dl_list_node node = list->front;
+    int index = 0;
+    bool found = false;
+
+    if ( list->cfunc == NULL ) {
+        fputs("cdatastruct error: compare function not provided.", stderr);
+        exit(EXIT_FAILURE);
+    }
+
+    while ( node && !found ) {
+        if ( list->cfunc(node->data, data) == 0 ) {
+            found = true;
+        } else {
+            node = node->next;
+            ++index;
+        }
+    }
+
+    if ( p_itr ) {
+        *p_itr = node;
+    }
+
+    if ( p_index ) {
+        *p_index = found ? index : CDSERR_NOTFOUND;
+    }
 }

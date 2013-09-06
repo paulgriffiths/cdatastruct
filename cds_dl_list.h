@@ -45,22 +45,27 @@ extern "C" {
 
 dl_list dl_list_init(int (*cfunc)(const void *, const void *));
 void dl_list_free(dl_list list);
+
 size_t dl_list_length(const dl_list list);
 bool dl_list_isempty(const dl_list list);
+
 void dl_list_prepend(dl_list list, void * data);
 void dl_list_append(dl_list list, void * data);
+int dl_list_insert_before(dl_list list, const dl_list_itr itr, void * data);
 int dl_list_insert_at(dl_list list, const size_t index, void * data);
 int dl_list_insert_after(dl_list list, const dl_list_itr itr, void * data);
-int dl_list_insert_before(dl_list list, const dl_list_itr itr, void * data);
+
+int dl_list_delete_at(dl_list list, const size_t index);
+
 int dl_list_find_index(const dl_list list, const void * data);
 dl_list_itr dl_list_find_itr(const dl_list list, const void * data);
 void * dl_list_data(const dl_list list, const size_t index);
+
 dl_list_itr dl_list_first(const dl_list list);
 dl_list_itr dl_list_last(const dl_list list);
 dl_list_itr dl_list_next(const dl_list_itr itr);
 dl_list_itr dl_list_prev(const dl_list_itr itr);
-dl_list_itr dl_list_index(const dl_list list, const size_t index);
-int dl_list_delete_at(dl_list list, const size_t index);
+dl_list_itr dl_list_itr_from_index(const dl_list list, const size_t index);
 
 #ifdef __cplusplus
 }
