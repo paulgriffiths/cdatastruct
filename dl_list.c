@@ -42,7 +42,7 @@ dl_list dl_list_init(int (*cfunc)(const void *, const void *)) {
  */
 
 void dl_list_free(dl_list list) {
-    while ( dl_list_isempty(list) != true ) {
+    while ( list->front ) {
         dl_list_delete_at(list, 0);
     }
     free(list);
@@ -92,10 +92,10 @@ void dl_list_prepend(dl_list list, void * data) {
  */
 
 void dl_list_append(dl_list list, void * data) {
-    if ( dl_list_isempty(list) ) {
-        dl_list_insert_at(list, 0, data);
-    } else {
+    if ( list->back ) {
         dl_list_insert_after(list, list->back, data);
+    } else {
+        dl_list_insert_at(list, 0, data);
     }
 }
 
@@ -429,14 +429,14 @@ dl_list_node dl_list_remove_at(dl_list list, const size_t index) {
  */
 
 void dl_list_insert_node_front(dl_list list, dl_list_node node) {
-    if ( dl_list_isempty(list) ) {
-        list->front = list->back = node;
-    } else {
+    if ( list->front ) {
         dl_list_node old_front = list->front;
         list->front = node;
         node->prev = NULL;
         node->next = old_front;
         old_front->prev = node;
+    } else {
+        list->front = list->back = node;
     }
     ++list->length;
 }
@@ -449,14 +449,14 @@ void dl_list_insert_node_front(dl_list list, dl_list_node node) {
  */
 
 void dl_list_insert_node_back(dl_list list, dl_list_node node) {
-    if ( dl_list_isempty(list) ) {
-        list->front = list->back = node;
-    } else {
+    if ( list->back ) {
         dl_list_node old_back = list->back;
         list->back = node;
         node->prev = old_back;
         node->next = NULL;
         old_back->next = node;
+    } else {
+        list->front = list->back = node;
     }
     ++list->length;
 }
@@ -516,9 +516,7 @@ void dl_list_insert_node_after_mid(dl_list list,
 
 dl_list_node dl_list_remove_node_front(dl_list list) {
     dl_list_node removed_node;
-    if ( dl_list_isempty(list) ) {
-        removed_node = NULL;
-    } else {
+    if ( list->front ) {
         removed_node = list->front;
         dl_list_node new_front = removed_node->next;
         list->front = new_front;
@@ -532,6 +530,8 @@ dl_list_node dl_list_remove_node_front(dl_list list) {
         removed_node->prev = NULL;
         removed_node->next = NULL;
         --list->length;
+    } else {
+        removed_node = NULL;
     }
 
     return removed_node;
@@ -546,9 +546,7 @@ dl_list_node dl_list_remove_node_front(dl_list list) {
 
 dl_list_node dl_list_remove_node_back(dl_list list) {
     dl_list_node removed_node;
-    if ( dl_list_isempty(list) ) {
-        removed_node = NULL;
-    } else {
+    if ( list->back ) {
         removed_node = list->back;
         dl_list_node new_back = removed_node->prev;
         list->back = new_back;
@@ -562,6 +560,8 @@ dl_list_node dl_list_remove_node_back(dl_list list) {
         removed_node->prev = NULL;
         removed_node->next = NULL;
         --list->length;
+    } else {
+        removed_node = NULL;
     }
 
     return removed_node;
