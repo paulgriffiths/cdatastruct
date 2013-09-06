@@ -25,10 +25,12 @@
 
 dl_list dl_list_init(int (*cfunc)(const void *, const void *)) {
     dl_list new_list = term_malloc(sizeof(*new_list));
+
     new_list->front = NULL;
     new_list->back = NULL;
     new_list->length = 0;
     new_list->cfunc = cfunc;
+
     return new_list;
 }
 
@@ -63,7 +65,7 @@ size_t dl_list_length(const dl_list list) {
  */
 
 bool dl_list_isempty(const dl_list list) {
-    return (list->length == 0) ? true : false;
+    return (list->front) ? false : true;
 }
 
 
@@ -77,6 +79,23 @@ bool dl_list_isempty(const dl_list list) {
 
 void dl_list_prepend(dl_list list, void * data) {
     dl_list_insert_at(list, 0, data);
+}
+
+
+/*!
+ * \brief           Inserts an element at the end of a list.
+ * \param list      A pointer to the list.
+ * \param data      A pointer to the data to add. The memory pointed
+ * to by this parameter must be dynamically allocated, as an attempt
+ * will be made to `free()` it when deleting the list.
+ */
+
+void dl_list_append(dl_list list, void * data) {
+    if ( list->back ) {
+        dl_list_insert_after(list, list->back, data);
+    } else {
+        dl_list_insert_at(list, 0, data);
+    }
 }
 
 
@@ -100,34 +119,27 @@ int dl_list_insert_at(dl_list list, const size_t index, void * data) {
 
     dl_list_node new_node = dl_list_new_node(data);
 
-    if ( index == 0 ) {
-        dl_list_node old_front = list->front;
-        if ( old_front ) {
-            old_front->prev = new_node;
-        } else {
-            list->back = new_node;
-        }
-        new_node->next = old_front;
-        new_node->prev = NULL;
+    if ( list->length == 0 ) {
         list->front = new_node;
+        list->back = new_node;
+    } else if ( index == 0 ) {
+        dl_list_node old_front = list->front;
+        new_node->next = old_front;
+        old_front->prev = new_node;
+        list->front = new_node;
+    } else if ( index == list->length ) {
+        dl_list_node old_back = list->back;
+        new_node->prev = old_back;
+        list->back = new_node;
+        old_back->next = new_node;
     } else {
-        size_t i = index;
-        dl_list_node before = list->front;
-        dl_list_node after = before->next;
+        dl_list_node after = dl_list_index(list, index);
+        dl_list_node before = after->prev;
 
-        while ( --i ) {
-            before = after;
-            after = after->next;
-        }
-
-        new_node->next = after;
-        if ( after ) {
-            after->prev = new_node;
-        } else {
-            list->back = new_node;
-        }
         new_node->prev = before;
+        new_node->next = after;
         before->next = new_node;
+        after->prev = new_node;
     }
     
     ++list->length;
@@ -164,17 +176,67 @@ int dl_list_insert_after(dl_list list, const dl_list_itr itr, void * data) {
         return CDSERR_BADITERATOR;
     }
 
+    /*  Create new node and get before and after pointers  */
+
     dl_list_node new_node = dl_list_new_node(data);
     dl_list_node after = itr->next;
+    dl_list_node before = itr;
+    new_node->next = after;
+    new_node->prev = before;
+    ++list->length;
+
+    /*  If `after` is `NULL`, we're inserting at the back of the list  */
+
     if ( after ) {
         after->prev = new_node;
     } else {
         list->back = new_node;
     }
+
+    /*  We're inserting after, so `before` is always non-NULL  */
+
+    before->next = new_node;
+
+    return 0;
+}
+
+
+/*!
+ * \brief           Inserts an element before a provided iterator.
+ * \param list      A pointer to the list.
+ * \param itr       The iterator after which to insert.
+ * \param data      A pointer to the data to add. The memory pointed
+ * to by this parameter must be dynamically allocated, as an attempt
+ * will be made to `free()` it when deleting the list.
+ * \returns         0 on success, CDSERR_BADITERATOR if `itr` is a
+ * NULL pointer.
+ */
+
+int dl_list_insert_before(dl_list list, const dl_list_itr itr, void * data) {
+    if ( itr == NULL ) {
+        return CDSERR_BADITERATOR;
+    }
+
+    /*  Create new node and get before and after pointers  */
+
+    dl_list_node new_node = dl_list_new_node(data);
+    dl_list_node after = itr;
+    dl_list_node before = itr->prev;
     new_node->next = after;
-    new_node->prev = itr;
-    itr->next = new_node;
+    new_node->prev = before;
     ++list->length;
+
+    /*  If `before` is `NULL`, we're inserting at the front of the list  */
+
+    if ( before ) {
+        before->next = new_node;
+    } else {
+        list->front = new_node;
+    }
+
+    /*  We're inserting before, so `after` is always non-NULL  */
+
+    after->prev = new_node;
 
     return 0;
 }
@@ -258,6 +320,17 @@ dl_list_itr dl_list_first(const dl_list list) {
 
 
 /*!
+ * \brief           Returns an iterator to the last element of a list.
+ * \param list      A pointer to the list.
+ * \returns         An iterator to the first element.
+ */
+
+dl_list_itr dl_list_last(const dl_list list) {
+    return list->back;
+}
+
+
+/*!
  * \brief           Advances a list iterator by one element.
  * \param itr       The iterator to advance
  * \returns         The advanced iterator.
@@ -291,14 +364,38 @@ dl_list_itr dl_list_index(const dl_list list, const size_t index) {
         return NULL;
     }
 
-    dl_list_itr itr = list->front;
-    size_t i = index;
+    dl_list_itr element;
 
-    while ( i-- ) {
-        itr = itr->next;
+    if ( index == 0 ) {
+        element = list->front;
+    } else if ( index == list->length - 1 ) {
+        element = list->back;
+    } else {
+
+        if ( index <= list->length / 2 ) {
+
+            /*  Find indexed element from front  */
+
+            size_t i = index;
+            element = list->front->next;
+
+            while ( --i ) {
+                element = element->next;
+            }
+        } else {
+
+            /*  Find indexed element from back  */
+
+            size_t i = list->length - 1;
+            element = list->back->prev;
+
+            while ( --i > index ) {
+                element = element->prev;
+            }
+        }
     }
 
-    return itr;
+    return element;
 }
 
 

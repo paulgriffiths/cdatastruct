@@ -42,6 +42,95 @@ BOOST_AUTO_TEST_CASE(dl_list_prepend_delete_front_test) {
     dl_list_free(list);
 }
 
+BOOST_AUTO_TEST_CASE(dl_list_append_test) {
+    dl_list list = dl_list_init(cds_compare_uint);
+    const unsigned int elems[] = {4, 9, 16, 25};
+    for ( size_t i = 0; i < 4; ++i ) {
+        dl_list_append(list, (void *) cds_new_uint(elems[i]));
+    }
+
+    BOOST_CHECK(dl_list_length(list) == 4);
+    BOOST_CHECK_EQUAL(4, *((unsigned int*) dl_list_data(list, 0)));
+    BOOST_CHECK_EQUAL(9, *((unsigned int*) dl_list_data(list, 1)));
+    BOOST_CHECK_EQUAL(16, *((unsigned int*) dl_list_data(list, 2)));
+    BOOST_CHECK_EQUAL(25, *((unsigned int*) dl_list_data(list, 3)));
+    BOOST_CHECK(dl_list_isempty(list) == false);
+
+    dl_list_free(list);
+}
+
+BOOST_AUTO_TEST_CASE(dl_list_index_test) {
+    dl_list list = dl_list_init(cds_compare_uint);
+    const unsigned int elems[] = {4, 9, 16, 25, 36, 49};
+    for ( size_t i = 0; i < 6; ++i ) {
+        dl_list_append(list, (void *) cds_new_uint(elems[i]));
+    }
+
+    BOOST_CHECK(dl_list_length(list) == 6);
+    BOOST_CHECK(dl_list_isempty(list) == false);
+
+    dl_list_itr itr = dl_list_index(list, 0);
+    BOOST_CHECK_EQUAL(4, *((unsigned int *) itr->data));
+
+    itr = dl_list_index(list, 1);
+    BOOST_CHECK_EQUAL(9, *((unsigned int *) itr->data));
+
+    itr = dl_list_index(list, 2);
+    BOOST_CHECK_EQUAL(16, *((unsigned int *) itr->data));
+
+    itr = dl_list_index(list, 3);
+    BOOST_CHECK_EQUAL(25, *((unsigned int *) itr->data));
+
+    itr = dl_list_index(list, 4);
+    BOOST_CHECK_EQUAL(36, *((unsigned int *) itr->data));
+
+    itr = dl_list_index(list, 5);
+    BOOST_CHECK_EQUAL(49, *((unsigned int *) itr->data));
+
+    dl_list_free(list);
+}
+
+BOOST_AUTO_TEST_CASE(dl_list_insert_before_test) {
+    dl_list list = dl_list_init(cds_compare_uint);
+    dl_list_append(list, (void *) cds_new_uint(4));
+
+    const unsigned int elems[] = {9, 16, 25, 36};
+    for ( size_t i = 0; i < 4; ++i ) {
+        dl_list_itr itr = dl_list_first(list);
+        dl_list_insert_before(list, itr, (void *) cds_new_uint(elems[i]));
+    }
+
+    BOOST_CHECK(dl_list_length(list) == 5);
+    BOOST_CHECK_EQUAL(36, *((unsigned int*) dl_list_data(list, 0)));
+    BOOST_CHECK_EQUAL(25, *((unsigned int*) dl_list_data(list, 1)));
+    BOOST_CHECK_EQUAL(16, *((unsigned int*) dl_list_data(list, 2)));
+    BOOST_CHECK_EQUAL(9, *((unsigned int*) dl_list_data(list, 3)));
+    BOOST_CHECK_EQUAL(4, *((unsigned int*) dl_list_data(list, 4)));
+    BOOST_CHECK(dl_list_isempty(list) == false);
+
+    dl_list_free(list);
+}
+
+BOOST_AUTO_TEST_CASE(dl_list_insert_at_back_test) {
+    dl_list list = dl_list_init(cds_compare_uint);
+
+    const unsigned int elems[] = {4, 9, 16, 25, 36};
+    for ( size_t i = 0; i < 5; ++i ) {
+        size_t list_len = dl_list_length(list);
+        dl_list_insert_at(list, list_len, (void *) cds_new_uint(elems[i]));
+    }
+
+    BOOST_CHECK(dl_list_length(list) == 5);
+    BOOST_CHECK_EQUAL(4, *((unsigned int*) dl_list_data(list, 0)));
+    BOOST_CHECK_EQUAL(9, *((unsigned int*) dl_list_data(list, 1)));
+    BOOST_CHECK_EQUAL(16, *((unsigned int*) dl_list_data(list, 2)));
+    BOOST_CHECK_EQUAL(25, *((unsigned int*) dl_list_data(list, 3)));
+    BOOST_CHECK_EQUAL(36, *((unsigned int*) dl_list_data(list, 4)));
+    BOOST_CHECK(dl_list_isempty(list) == false);
+
+    dl_list_free(list);
+}
+
 BOOST_AUTO_TEST_CASE(dl_list_add_delete_back_test) {
     dl_list list = dl_list_init(cds_compare_ulong);
     const unsigned long elems[] = {4, 9, 16, 25};
