@@ -41,7 +41,7 @@ dl_list dl_list_init(int (*cfunc)(const void *, const void *)) {
  */
 
 void dl_list_free(dl_list list) {
-    while ( list->front ) {
+    while ( dl_list_isempty(list) != true ) {
         dl_list_delete_at(list, 0);
     }
     free(list);
@@ -91,10 +91,10 @@ void dl_list_prepend(dl_list list, void * data) {
  */
 
 void dl_list_append(dl_list list, void * data) {
-    if ( list->back ) {
-        dl_list_insert_after(list, list->back, data);
-    } else {
+    if ( dl_list_isempty(list) ) {
         dl_list_insert_at(list, 0, data);
+    } else {
+        dl_list_insert_after(list, list->back, data);
     }
 }
 
@@ -119,30 +119,14 @@ int dl_list_insert_at(dl_list list, const size_t index, void * data) {
 
     dl_list_node new_node = dl_list_new_node(data);
 
-    if ( list->length == 0 ) {
-        list->front = new_node;
-        list->back = new_node;
-    } else if ( index == 0 ) {
-        dl_list_node old_front = list->front;
-        new_node->next = old_front;
-        old_front->prev = new_node;
-        list->front = new_node;
+    if ( index == 0 ) {
+        dl_list_insert_node_front(list, new_node);
     } else if ( index == list->length ) {
-        dl_list_node old_back = list->back;
-        new_node->prev = old_back;
-        list->back = new_node;
-        old_back->next = new_node;
+        dl_list_insert_node_back(list, new_node);
     } else {
         dl_list_node after = dl_list_index(list, index);
-        dl_list_node before = after->prev;
-
-        new_node->prev = before;
-        new_node->next = after;
-        before->next = new_node;
-        after->prev = new_node;
+        dl_list_insert_node_before_mid(list, after, new_node);
     }
-    
-    ++list->length;
 
     return 0;
 }
@@ -176,26 +160,12 @@ int dl_list_insert_after(dl_list list, const dl_list_itr itr, void * data) {
         return CDSERR_BADITERATOR;
     }
 
-    /*  Create new node and get before and after pointers  */
-
     dl_list_node new_node = dl_list_new_node(data);
-    dl_list_node after = itr->next;
-    dl_list_node before = itr;
-    new_node->next = after;
-    new_node->prev = before;
-    ++list->length;
-
-    /*  If `after` is `NULL`, we're inserting at the back of the list  */
-
-    if ( after ) {
-        after->prev = new_node;
+    if ( itr->next ) {
+        dl_list_insert_node_after_mid(list, itr, new_node);
     } else {
-        list->back = new_node;
+        dl_list_insert_node_back(list, new_node);
     }
-
-    /*  We're inserting after, so `before` is always non-NULL  */
-
-    before->next = new_node;
 
     return 0;
 }
@@ -217,26 +187,12 @@ int dl_list_insert_before(dl_list list, const dl_list_itr itr, void * data) {
         return CDSERR_BADITERATOR;
     }
 
-    /*  Create new node and get before and after pointers  */
-
     dl_list_node new_node = dl_list_new_node(data);
-    dl_list_node after = itr;
-    dl_list_node before = itr->prev;
-    new_node->next = after;
-    new_node->prev = before;
-    ++list->length;
-
-    /*  If `before` is `NULL`, we're inserting at the front of the list  */
-
-    if ( before ) {
-        before->next = new_node;
+    if ( itr->prev ) {
+        dl_list_insert_node_before_mid(list, itr, new_node);
     } else {
-        list->front = new_node;
+        dl_list_insert_node_front(list, new_node);
     }
-
-    /*  We're inserting before, so `after` is always non-NULL  */
-
-    after->prev = new_node;
 
     return 0;
 }
@@ -466,6 +422,92 @@ dl_list_node dl_list_remove_at(dl_list list, const size_t index) {
     --list->length;
 
     return itr;
+}
+
+
+/*!
+ * \brief           Inserts a node at the front of a list.
+ * \param list      A pointer to the list.
+ * \param node      A pointer to the node to insert.
+ */
+
+void dl_list_insert_node_front(dl_list list, dl_list_node node) {
+    if ( dl_list_isempty(list) ) {
+        list->front = list->back = node;
+    } else {
+        dl_list_node old_front = list->front;
+        list->front = node;
+        node->prev = NULL;
+        node->next = old_front;
+        old_front->prev = node;
+    }
+    ++list->length;
+}
+
+
+/*!
+ * \brief           Inserts a node at the back of a list.
+ * \param list      A pointer to the list.
+ * \param node      A pointer to the node to insert.
+ */
+
+void dl_list_insert_node_back(dl_list list, dl_list_node node) {
+    if ( dl_list_isempty(list) ) {
+        list->front = list->back = node;
+    } else {
+        dl_list_node old_back = list->back;
+        list->back = node;
+        node->prev = old_back;
+        node->next = NULL;
+        old_back->next = node;
+    }
+    ++list->length;
+}
+
+
+/*!
+ * \brief           Inserts a node in the middle of a list before a specified
+ * iterator.
+ * \param list      A pointer to the list.
+ * \param itr       The iterator before which to insert. As this is
+ * inserting in the middle, this iterator should not be either the front
+ * or the back of the list, i.e. both the `prev` and `next` members
+ * should be non-NULL.
+ * \param node      A pointer to the node to insert.
+ */
+
+void dl_list_insert_node_before_mid(dl_list list,
+        dl_list_itr itr, dl_list_node node) {
+    dl_list_node before = itr->prev;
+    dl_list_node after = itr;
+    node->prev = before;
+    node->next = after;
+    before->next = node;
+    after->prev = node;
+    ++list->length;
+}
+
+
+/*!
+ * \brief           Inserts a node in the middle of a list after a specified
+ * iterator.
+ * \param list      A pointer to the list.
+ * \param itr       The iterator after which to insert. As this is
+ * inserting in the middle, this iterator should not be either the front
+ * or the back of the list, i.e. both the `prev` and `next` members
+ * should be non-NULL.
+ * \param node      A pointer to the node to insert.
+ */
+
+void dl_list_insert_node_after_mid(dl_list list,
+        dl_list_itr itr, dl_list_node node) {
+    dl_list_node before = itr;
+    dl_list_node after = itr->next;
+    node->prev = before;
+    node->next = after;
+    before->next = node;
+    after->prev = node;
+    ++list->length;
 }
 
 
