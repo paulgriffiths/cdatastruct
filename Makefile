@@ -47,7 +47,7 @@ LD_TEST_FLAGS+=-lstdc++
 LD_TEST_FLAGS+=-l$(LIBNAME) -L$(CURDIR) -lchelpers
 
 # Object code files
-OBJS=general.o sl_list.o dl_list.o stack.o queue.o bs_tree.o
+OBJS=general.o sl_list.o dl_list.o stack.o queue.o bs_tree.o bst_map.o
 
 TESTOBJS=tests/test_main.o
 TESTOBJS+=tests/test_sl_list.o
@@ -55,6 +55,7 @@ TESTOBJS+=tests/test_dl_list.o
 TESTOBJS+=tests/test_stack.o
 TESTOBJS+=tests/test_queue.o
 TESTOBJS+=tests/test_bs_tree.o
+TESTOBJS+=tests/test_bst_map.o
 
 # Source and clean files and globs
 SRCS=$(wildcard *.c *.h)
@@ -185,6 +186,10 @@ bs_tree.o: bs_tree.c cds_bs_tree.h bs_tree.h cds_common.h
 	@echo "Compiling $<..."
 	@$(CC) $(CFLAGS) -c -o $@ $<
 
+bst_map.o: bst_map.c cds_bst_map.h cds_common.h
+	@echo "Compiling $<..."
+	@$(CC) $(CFLAGS) -c -o $@ $<
+
 # Unit tests
 
 tests/test_main.o: tests/test_main.cpp
@@ -208,6 +213,10 @@ tests/test_queue.o: tests/test_queue.cpp
 	@$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 tests/test_bs_tree.o: tests/test_bs_tree.cpp
+	@echo "Compiling $<..."
+	@$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+tests/test_bst_map.o: tests/test_bst_map.cpp
 	@echo "Compiling $<..."
 	@$(CXX) $(CXXFLAGS) -c -o $@ $<
 

@@ -84,8 +84,8 @@ bool bs_tree_isempty(const bs_tree tree) {
  * \returns         `true` is the data is found, `false` otherwise.
  */
 
-bool bs_tree_search(bs_tree tree, void * data) {
-    bs_tree_node node = bs_tree_search_node(tree, data);
+bool bs_tree_search(const bs_tree tree, const void * data) {
+    const bs_tree_node node = bs_tree_search_node(tree, data);
     return node ? true : false;
 }
 
@@ -97,7 +97,7 @@ bool bs_tree_search(bs_tree tree, void * data) {
  * \returns         A pointer to the data if found, `NULL` otherwise.
  */
 
-void * bs_tree_search_data(bs_tree tree, void * data) {
+void * bs_tree_search_data(const bs_tree tree, const void * data) {
     void * return_data;
     bs_tree_node node = bs_tree_search_node(tree, data);
     if ( node ) {
@@ -167,7 +167,7 @@ void bs_tree_free_subtree(bs_tree tree, bs_tree_node node) {
  * or `NULL` if the data was not found.
  */
 
-bs_tree_node bs_tree_search_node(bs_tree tree, void * data) {
+bs_tree_node bs_tree_search_node(const bs_tree tree, const void * data) {
     bs_tree_node searchnode = tree->root;
     bool found = false;
     int compare;

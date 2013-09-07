@@ -41,7 +41,7 @@ extern "C" {
 
 bs_tree_node bs_tree_new_node(void * data);
 void bs_tree_free_subtree(bs_tree tree, bs_tree_node node);
-bs_tree_node bs_tree_search_node(bs_tree tree, void * key);
+bs_tree_node bs_tree_search_node(const bs_tree tree, const void * key);
 bool bs_tree_insert_subtree(bs_tree tree, bs_tree_node * p_node, void * data);
 bs_tree_node bst_insert_search(bs_tree tree, void * key, bool * found);
 

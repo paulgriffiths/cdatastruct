@@ -44,8 +44,8 @@ bool bs_tree_isempty(const bs_tree tree);
 size_t bs_tree_length(const bs_tree tree);
 
 bool bs_tree_insert(bs_tree tree, void * data);
-bool bs_tree_search(bs_tree tree, void * data);
-void * bs_tree_search_data(bs_tree tree, void * data);
+bool bs_tree_search(const bs_tree tree, const void * data);
+void * bs_tree_search_data(const bs_tree tree, const void * data);
 
 #ifdef __cplusplus
 }
