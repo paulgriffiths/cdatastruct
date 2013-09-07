@@ -5,7 +5,8 @@ What is it?
 -----------
 
 **cdatastruct** is C library of generic, basic data structures. They can
-be used with any built-in or user-defined data types.
+be used with any built-in or user-defined data types. `lock()` and
+`unlock()` functions are provided for threaded applications.
 
 Structures currently implemented are:
 - Singly linked, single ended list;
