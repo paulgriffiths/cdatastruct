@@ -18,6 +18,7 @@
 #include "cds_dl_list.h"
 #include "cds_stack.h"
 #include "cds_queue.h"
+#include "cds_bs_tree.h"
 
 
 #endif          /*  PG_C_DATA_STRUCTURES_H  */
