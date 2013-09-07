@@ -43,7 +43,8 @@ typedef struct dl_list_node_t * dl_list_itr;
 extern "C" {
 #endif
 
-dl_list dl_list_init(int (*cfunc)(const void *, const void *));
+dl_list dl_list_init(int (*cfunc)(const void *, const void *),
+                     void (*free_func)(void *));
 void dl_list_free(dl_list list);
 
 size_t dl_list_length(const dl_list list);

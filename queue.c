@@ -19,11 +19,14 @@
 
 /*!
  * \brief           Initializes a new queue.
+ * \param free_func A pointer to a function to free a queue node. The
+ * function should return no value, and accept a `void` pointer to a
+ * node. If `NULL` is specified, the standard `free()` function is used.
  * \returns         A pointer to the new queue.
  */
 
-queue queue_init(void) {
-    return dl_list_init(NULL);
+queue queue_init(void (*free_func)(void *)) {
+    return dl_list_init(NULL, free_func);
 }
 
 

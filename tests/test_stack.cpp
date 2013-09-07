@@ -19,7 +19,7 @@
 BOOST_AUTO_TEST_SUITE(stack_suite)
 
 BOOST_AUTO_TEST_CASE(stack_basic_test) {
-    stack stk = stack_init();
+    stack stk = stack_init(NULL);
 
     stack_push(stk, cds_new_int(4));
     stack_push(stk, cds_new_int(9));

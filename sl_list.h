@@ -22,6 +22,7 @@ typedef struct sl_list_t {
     struct sl_list_node_t * front;      /*!< Pointer to first node */
     size_t length;                      /*!< Length of list */
     int (*cfunc)();                     /*!< Pointer to compare function */
+    void (*free_func)();                /*!< Pointer to free function */
 } sl_list_t;
 
 
@@ -39,7 +40,7 @@ extern "C" {
 #endif
 
 sl_list_node sl_list_new_node(void * data);
-void sl_list_free_node(sl_list_node node);
+void sl_list_free_node(sl_list list, sl_list_node node);
 
 sl_list_node sl_list_remove_at(sl_list list, const size_t index);
 

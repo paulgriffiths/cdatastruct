@@ -21,16 +21,25 @@
  * return less than 1 if the first parameter is less than the second,
  * greater than 1 if the first parameter is greater than the second,
  * and zero if the parameters are equal.
+ * \param free_func A pointer to a function to free a node. The function
+ * should return no value, and accept a `void` pointer to the node. If
+ * `NULL` is specified, the standard `free()` function is used.
  * \returns         A pointer to the new list.
  */
 
-dl_list dl_list_init(int (*cfunc)(const void *, const void *)) {
+dl_list dl_list_init(int (*cfunc)(const void *, const void *),
+                     void (*free_func)(void *)) {
     dl_list new_list = term_malloc(sizeof(*new_list));
 
     new_list->front = NULL;
     new_list->back = NULL;
     new_list->length = 0;
     new_list->cfunc = cfunc;
+    if ( free_func) {
+        new_list->free_func = free_func;
+    } else {
+        new_list->free_func = free;
+    }
 
     return new_list;
 }
@@ -214,7 +223,7 @@ int dl_list_delete_at(dl_list list, const size_t index) {
         return CDSERR_OUTOFRANGE;
     }
 
-    dl_list_free_node(rm_node);
+    dl_list_free_node(list, rm_node);
     return 0;
 }
 
@@ -371,11 +380,12 @@ dl_list_node dl_list_new_node(void * data) {
 
 /*!
  * \brief           Frees resources for a node and any data.
+ * \param list      A pointer to the list.
  * \param node      A pointer to the node to free.
  */
 
-void dl_list_free_node(dl_list_node node) {
-    free(node->data);
+void dl_list_free_node(dl_list list, dl_list_node node) {
+    list->free_func(node->data);
     free(node);
 }
 

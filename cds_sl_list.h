@@ -42,7 +42,8 @@ typedef struct sl_list_node_t * sl_list_itr;
 extern "C" {
 #endif
 
-sl_list sl_list_init(int (*cfunc)(const void *, const void *));
+sl_list sl_list_init(int (*cfunc)(const void *, const void *),
+                     void (*free_func)(void *));
 void sl_list_free(sl_list list);
 
 size_t sl_list_length(const sl_list list);

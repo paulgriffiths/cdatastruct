@@ -23,6 +23,7 @@ typedef struct dl_list_t {
     struct dl_list_node_t * back;       /*!< Pointer to last node */
     size_t length;                      /*!< Length of list */
     int (*cfunc)();                     /*!< Pointer to compare function */
+    void (*free_func)();                /*!< Pointer to free function */
 } dl_list_t;
 
 
@@ -40,7 +41,7 @@ extern "C" {
 #endif
 
 dl_list_node dl_list_new_node(void * data);
-void dl_list_free_node(dl_list_node node);
+void dl_list_free_node(dl_list list, dl_list_node node);
 
 void dl_list_insert_node_front(dl_list list, dl_list_node node);
 void dl_list_insert_node_before_mid(dl_list list,

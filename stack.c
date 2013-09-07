@@ -19,11 +19,14 @@
 
 /*!
  * \brief           Initializes a new stack.
+ * \param free_func A pointer to a function a free a stack node. The
+ * function should return no value, and accept a `void` pointer to a
+ * node. If `NULL` is specified, the standard `free()` function is used.
  * \returns         A pointer to the new stack.
  */
 
-stack stack_init(void) {
-    return sl_list_init(NULL);
+stack stack_init(void (*free_func)(void *)) {
+    return sl_list_init(NULL, free_func);
 }
 
 

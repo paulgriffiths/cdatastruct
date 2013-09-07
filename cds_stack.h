@@ -26,7 +26,7 @@ typedef struct sl_list_t * stack;
 extern "C" {
 #endif
 
-stack stack_init(void);
+stack stack_init(void (*free_func)(void *));
 void stack_free(stack stk);
 size_t stack_length(const stack stk);
 bool stack_isempty(const stack stk);

@@ -19,7 +19,7 @@
 BOOST_AUTO_TEST_SUITE(queue_suite)
 
 BOOST_AUTO_TEST_CASE(queue_basic_test) {
-    queue que = queue_init();
+    queue que = queue_init(NULL);
 
     queue_pushback(que, cds_new_int(4));
     queue_pushback(que, cds_new_int(9));

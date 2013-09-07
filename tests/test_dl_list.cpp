@@ -19,7 +19,7 @@
 BOOST_AUTO_TEST_SUITE(dl_list_suite)
 
 BOOST_AUTO_TEST_CASE(dl_list_prepend_delete_front_test) {
-    dl_list list = dl_list_init(cds_compare_uint);
+    dl_list list = dl_list_init(cds_compare_uint, NULL);
     const unsigned int elems[] = {4, 9, 16, 25};
     for ( size_t i = 0; i < 4; ++i ) {
         dl_list_prepend(list, (void *) cds_new_uint(elems[i]));
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(dl_list_prepend_delete_front_test) {
 }
 
 BOOST_AUTO_TEST_CASE(dl_list_append_test) {
-    dl_list list = dl_list_init(cds_compare_uint);
+    dl_list list = dl_list_init(cds_compare_uint, NULL);
     const unsigned int elems[] = {4, 9, 16, 25};
     for ( size_t i = 0; i < 4; ++i ) {
         dl_list_append(list, (void *) cds_new_uint(elems[i]));
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(dl_list_append_test) {
 }
 
 BOOST_AUTO_TEST_CASE(dl_list_itr_from_index_test) {
-    dl_list list = dl_list_init(cds_compare_uint);
+    dl_list list = dl_list_init(cds_compare_uint, NULL);
     const unsigned int elems[] = {4, 9, 16, 25, 36, 49};
     for ( size_t i = 0; i < 6; ++i ) {
         dl_list_append(list, (void *) cds_new_uint(elems[i]));
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(dl_list_itr_from_index_test) {
 }
 
 BOOST_AUTO_TEST_CASE(dl_list_insert_before_test) {
-    dl_list list = dl_list_init(cds_compare_uint);
+    dl_list list = dl_list_init(cds_compare_uint, NULL);
     dl_list_append(list, (void *) cds_new_uint(4));
 
     const unsigned int elems[] = {9, 16, 25, 36};
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(dl_list_insert_before_test) {
 }
 
 BOOST_AUTO_TEST_CASE(dl_list_insert_at_back_test) {
-    dl_list list = dl_list_init(cds_compare_uint);
+    dl_list list = dl_list_init(cds_compare_uint, NULL);
 
     const unsigned int elems[] = {4, 9, 16, 25, 36};
     for ( size_t i = 0; i < 5; ++i ) {
@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE(dl_list_insert_at_back_test) {
 }
 
 BOOST_AUTO_TEST_CASE(dl_list_add_delete_back_test) {
-    dl_list list = dl_list_init(cds_compare_ulong);
+    dl_list list = dl_list_init(cds_compare_ulong, NULL);
     const unsigned long elems[] = {4, 9, 16, 25};
     for ( size_t i = 0; i < 4; ++i ) {
         dl_list_insert_at(list, i, (void *) cds_new_ulong(elems[i]));
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(dl_list_add_delete_back_test) {
 }
 
 BOOST_AUTO_TEST_CASE(dl_list_itr_get_data_test) {
-    dl_list list = dl_list_init(cds_compare_string);
+    dl_list list = dl_list_init(cds_compare_string, NULL);
     const char * elems[] = {"spam", "eggs", "bacon", "toffee", "gruel"};
     for ( size_t i = 0; i < 5; ++i ) {
         dl_list_insert_at(list, i, (void *) cds_new_string(elems[i]));
@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE(dl_list_itr_get_data_test) {
 }
 
 BOOST_AUTO_TEST_CASE(dl_list_find_insert_itr_test) {
-    dl_list list = dl_list_init(cds_compare_string);
+    dl_list list = dl_list_init(cds_compare_string, NULL);
     const int elems[] = {4, 9, 16, 25, 36, 49};
     for ( size_t i = 0; i < 6; ++i ) {
         dl_list_insert_at(list, i, (void *) cds_new_int(elems[i]));
@@ -212,7 +212,7 @@ BOOST_AUTO_TEST_CASE(dl_list_find_insert_itr_test) {
 }
 
 BOOST_AUTO_TEST_CASE(dl_list_find_insert_index_test) {
-    dl_list list = dl_list_init(cds_compare_string);
+    dl_list list = dl_list_init(cds_compare_string, NULL);
     const long elems[] = {4, 9, 16, 25, 36, 49};
     for ( size_t i = 0; i < 6; ++i ) {
         dl_list_insert_at(list, i, (void *) cds_new_long(elems[i]));

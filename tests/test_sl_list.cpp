@@ -19,7 +19,7 @@
 BOOST_AUTO_TEST_SUITE(sl_list_suite)
 
 BOOST_AUTO_TEST_CASE(sl_list_prepend_delete_front_test) {
-    sl_list list = sl_list_init(cds_compare_uint);
+    sl_list list = sl_list_init(cds_compare_uint, NULL);
     const unsigned int elems[] = {4, 9, 16, 25};
     for ( size_t i = 0; i < 4; ++i ) {
         sl_list_prepend(list, (void *) cds_new_uint(elems[i]));
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(sl_list_prepend_delete_front_test) {
 }
 
 BOOST_AUTO_TEST_CASE(sl_list_add_delete_back_test) {
-    sl_list list = sl_list_init(cds_compare_ulong);
+    sl_list list = sl_list_init(cds_compare_ulong, NULL);
     const unsigned long elems[] = {4, 9, 16, 25};
     for ( size_t i = 0; i < 4; ++i ) {
         sl_list_insert_at(list, i, (void *) cds_new_ulong(elems[i]));
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(sl_list_add_delete_back_test) {
 }
 
 BOOST_AUTO_TEST_CASE(sl_list_itr_get_data_test) {
-    sl_list list = sl_list_init(cds_compare_string);
+    sl_list list = sl_list_init(cds_compare_string, NULL);
     const char * elems[] = {"spam", "eggs", "bacon", "toffee", "gruel"};
     for ( size_t i = 0; i < 5; ++i ) {
         sl_list_insert_at(list, i, (void *) cds_new_string(elems[i]));
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(sl_list_itr_get_data_test) {
 }
 
 BOOST_AUTO_TEST_CASE(sl_list_find_insert_itr_test) {
-    sl_list list = sl_list_init(cds_compare_string);
+    sl_list list = sl_list_init(cds_compare_string, NULL);
     const int elems[] = {4, 9, 16, 25, 36, 49};
     for ( size_t i = 0; i < 6; ++i ) {
         sl_list_insert_at(list, i, (void *) cds_new_int(elems[i]));
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(sl_list_find_insert_itr_test) {
 }
 
 BOOST_AUTO_TEST_CASE(sl_list_find_insert_index_test) {
-    sl_list list = sl_list_init(cds_compare_string);
+    sl_list list = sl_list_init(cds_compare_string, NULL);
     const long elems[] = {4, 9, 16, 25, 36, 49};
     for ( size_t i = 0; i < 6; ++i ) {
         sl_list_insert_at(list, i, (void *) cds_new_long(elems[i]));

@@ -26,7 +26,7 @@ typedef struct dl_list_t * queue;
 extern "C" {
 #endif
 
-queue queue_init(void);
+queue queue_init(void (*free_func)(void *));
 void queue_free(queue que);
 size_t queue_length(const queue que);
 bool queue_isempty(const queue que);
