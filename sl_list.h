@@ -38,12 +38,17 @@ typedef struct sl_list_node_t * sl_list_node;
 extern "C" {
 #endif
 
-sl_list_node sl_list_remove_at(sl_list list, const size_t index);
 sl_list_node sl_list_new_node(void * data);
 void sl_list_free_node(sl_list_node node);
+
+sl_list_node sl_list_remove_at(sl_list list, const size_t index);
+
+void sl_list_find(const sl_list list, const void * data,
+                  sl_list_itr * p_itr, int * p_index);
 
 #ifdef __cplusplus
 }
 #endif
+
 
 #endif          /*  PG_CDS_SINGLY_LINKED_LIST_DEV_H  */

@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(sl_list_find_insert_itr_test) {
     BOOST_CHECK_EQUAL(36, *((int *) sl_list_data(list, 5)));
     BOOST_CHECK_EQUAL(49, *((int *) sl_list_data(list, 6)));
 
-    itr = sl_list_index(list, 5);
+    itr = sl_list_itr_from_index(list, 5);
     BOOST_CHECK_EQUAL(36, *((long *) itr->data));
     sl_list_free(list);
 }

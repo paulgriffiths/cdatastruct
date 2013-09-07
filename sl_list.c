@@ -62,7 +62,7 @@ size_t sl_list_length(const sl_list list) {
  */
 
 bool sl_list_isempty(const sl_list list) {
-    return (list->length == 0) ? true : false;
+    return ( list->front ) ? false : true;
 }
 
 
@@ -97,27 +97,22 @@ int sl_list_insert_at(sl_list list, const size_t index, void * data) {
         return CDSERR_OUTOFRANGE;
     }
 
-    sl_list_node new_node = sl_list_new_node(data);
-
     if ( index == 0 ) {
+        sl_list_node new_node = sl_list_new_node(data);
         new_node->next = list->front;
         list->front = new_node;
+        ++list->length;
     } else {
         size_t i = index;
         sl_list_node before = list->front;
-        sl_list_node after = before->next;
 
         while ( --i ) {
-            before = after;
-            after = after->next;
+            before = before->next;
         }
 
-        new_node->next = after;
-        before->next = new_node;
+        sl_list_insert_after(list, before, data);
     }
     
-    ++list->length;
-
     return 0;
 }
 
@@ -148,28 +143,37 @@ int sl_list_insert_after(sl_list list, const sl_list_itr itr, void * data) {
 
 
 /*!
- * \brief           Finds the index of the specified data in a list.
+ * \brief           Deletes a list element at a specified index.
+ * \param list      A pointer to the list.
+ * \param index     The index of the element to delete.
+ * \returns         0 on success, CDSERR_OUTOFRANGE if the the index
+ * is out of range.
+ */
+
+int sl_list_delete_at(sl_list list, const size_t index) {
+    sl_list_node rm_node = sl_list_remove_at(list, index);
+
+    if ( rm_node == NULL ) {
+        return CDSERR_OUTOFRANGE;
+    }
+
+    sl_list_free_node(rm_node);
+    return 0;
+}
+
+
+/*!
+ * \brief           Gets an index to the specified data in a list.
  * \param list      A pointer to the list.
  * \param data      A pointer to the data to find.
- * \returns         The index of the element, if found, or CDSERR_NOTFOUND
- * if it is not in the list.
+ * \returns         The index of the found element, or CDSERR_NOTFOUND
+ * if the element is not in the list.
  */
 
 int sl_list_find_index(const sl_list list, const void * data) {
-    sl_list_node node = list->front;
-    int index = 0;
-    bool found = false;
-
-    while ( node && !found ) {
-        if ( list->cfunc(node->data, data) == 0 ) {
-            found = true;
-        } else {
-            node = node->next;
-            ++index;
-        }
-    }
-
-    return found ? index : CDSERR_NOTFOUND;
+    int index;
+    sl_list_find(list, data, NULL, &index);
+    return index;
 }
 
 
@@ -182,19 +186,8 @@ int sl_list_find_index(const sl_list list, const void * data) {
  */
 
 sl_list_itr sl_list_find_itr(const sl_list list, const void * data) {
-    sl_list_itr itr = list->front;
-    int index = 0;
-    bool found = false;
-
-    while ( itr && !found ) {
-        if ( list->cfunc(itr->data, data) == 0 ) {
-            found = true;
-        } else {
-            itr = itr->next;
-            ++index;
-        }
-    }
-
+    sl_list_itr itr;
+    sl_list_find(list, data, &itr, NULL);
     return itr;
 }
 
@@ -208,7 +201,7 @@ sl_list_itr sl_list_find_itr(const sl_list list, const void * data) {
  */
 
 void * sl_list_data(const sl_list list, const size_t index) {
-    sl_list_itr itr = sl_list_index(list, index);
+    sl_list_itr itr = sl_list_itr_from_index(list, index);
     return itr ? itr->data : NULL;
 }
 
@@ -242,7 +235,7 @@ sl_list_itr sl_list_next(const sl_list_itr itr) {
  * \returns         The iterator, or NULL if `index` is out of range.
  */
 
-sl_list_itr sl_list_index(const sl_list list, const size_t index) {
+sl_list_itr sl_list_itr_from_index(const sl_list list, const size_t index) {
     if ( index >= list->length ) {
         return NULL;
     }
@@ -253,62 +246,6 @@ sl_list_itr sl_list_index(const sl_list list, const size_t index) {
     while ( i-- ) {
         itr = itr->next;
     }
-
-    return itr;
-}
-
-
-/*!
- * \brief           Deletes a list element at a specified index.
- * \param list      A pointer to the list.
- * \param index     The index of the element to delete.
- * \returns         0 on success, CDSERR_OUTOFRANGE if the the index
- * is out of range.
- */
-
-int sl_list_delete_at(sl_list list, const size_t index) {
-    sl_list_node rm_node = sl_list_remove_at(list, index);
-
-    if ( rm_node == NULL ) {
-        return CDSERR_OUTOFRANGE;
-    }
-
-    sl_list_free_node(rm_node);
-    return 0;
-}
-
-
-/*!
- * \brief           Removes, but does not delete, an element at an index.
- * \param list      A pointer to the list.
- * \param index     The index of the element to be removed.
- * \returns         A pointer to the removed node. This should be
- * `free()`d by calling sl_list_free_node().
- */
-
-sl_list_node sl_list_remove_at(sl_list list, const size_t index) {
-    if ( index >= list->length ) {
-        return NULL;
-    }
-
-    sl_list_node itr = list->front;
-    if ( index == 0 ) {
-        list->front = itr->next;
-    } else {
-        size_t i = index;
-        sl_list_node before = itr;
-        itr = itr->next;
-
-        while ( --i ) {
-            before = itr;
-            itr = itr->next;
-        }
-
-        before->next = itr->next;
-    }
-
-    itr->next = NULL;
-    --list->length;
 
     return itr;
 }
@@ -336,4 +273,68 @@ sl_list_node sl_list_new_node(void * data) {
 void sl_list_free_node(sl_list_node node) {
     free(node->data);
     free(node);
+}
+
+
+/*!
+ * \brief           Removes, but does not delete, an element at an index.
+ * \param list      A pointer to the list.
+ * \param index     The index of the element to be removed.
+ * \returns         A pointer to the removed node. This should be
+ * `free()`d by calling sl_list_free_node().
+ */
+
+sl_list_node sl_list_remove_at(sl_list list, const size_t index) {
+    if ( index >= list->length ) {
+        return NULL;
+    }
+
+    sl_list_node itr = list->front;
+    if ( index == 0 ) {
+        list->front = itr->next;
+    } else {
+        sl_list_itr before = sl_list_itr_from_index(list, index - 1);
+        itr = before->next;
+        before->next = itr->next;
+    }
+
+    itr->next = NULL;
+    --list->length;
+
+    return itr;
+}
+
+
+/*!
+ * \brief           Gets an index and iterator to a specified piece of data.
+ * \param list      A pointer to the list.
+ * \param data      A pointer to the data to find.
+ * \param p_itr     A pointer to an iterator to populate with the result.
+ * This parameter is ignored if set to NULL.
+ * \param p_index   A pointer to an integer index to populate with the result.
+ * This parameter is ignored if set to NULL.
+ */
+
+void sl_list_find(const sl_list list, const void * data,
+                  sl_list_itr * p_itr, int * p_index) {
+    sl_list_node node = list->front;
+    int index = 0;
+    bool found = false;
+
+    while ( node && !found ) {
+        if ( list->cfunc(node->data, data) == 0 ) {
+            found = true;
+        } else {
+            node = node->next;
+            ++index;
+        }
+    }
+
+    if ( p_itr ) {
+        *p_itr = node;
+    }
+
+    if ( p_index ) {
+        *p_index = found ? index : CDSERR_NOTFOUND;
+    }
 }
