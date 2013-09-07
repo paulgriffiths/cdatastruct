@@ -19,7 +19,7 @@
 BOOST_AUTO_TEST_SUITE(bs_tree_suite)
 
 BOOST_AUTO_TEST_CASE(bs_tree_insert_search_test) {
-    bs_tree tree = bs_tree_init(cds_compare_string);
+    bs_tree tree = bs_tree_init(cds_compare_string, NULL);
 
     bs_tree_insert(tree, cds_new_string("bacon"));
     bs_tree_insert(tree, cds_new_string("eggs"));
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(bs_tree_insert_search_test) {
 }
 
 BOOST_AUTO_TEST_CASE(bs_tree_insert_existing_test) {
-    bs_tree tree = bs_tree_init(cds_compare_string);
+    bs_tree tree = bs_tree_init(cds_compare_string, NULL);
 
     bs_tree_insert(tree, cds_new_string("bacon"));
     bs_tree_insert(tree, cds_new_string("eggs"));

@@ -20,14 +20,26 @@
  * return less than 1 if the first parameter is less than the second,
  * greater than 1 if the first parameter is greater than the second,
  * and zero if the parameters are equal.
+ * \param free_func A pointer to a free function. The function should
+ * return no value, and accept one parameter of type `void *`. If set
+ * to NULL, the standard C `free()` function is used. This function
+ * is useful when the data elements are structs which themselves
+ * contain dynamically allocated members, which need to be `free()`d
+ * before the overall struct is `free()`.
  * \returns         A pointer to the new tree.
  */
 
-bs_tree bs_tree_init(int (*cfunc)(const void *, const void *)) {
+bs_tree bs_tree_init(int (*cfunc)(const void *, const void *),
+                     void (*free_func)(void *)) {
     bs_tree new_tree = term_malloc(sizeof(*new_tree));
     new_tree->root = NULL;
     new_tree->length = 0;
     new_tree->cfunc = cfunc;
+    if ( free_func ) {
+        new_tree->free_func = free_func;
+    } else {
+        new_tree->free_func = free;
+    }
     return new_tree;
 }
 
@@ -38,7 +50,7 @@ bs_tree bs_tree_init(int (*cfunc)(const void *, const void *)) {
  */
 
 void bs_tree_free(bs_tree tree) {
-    bs_tree_free_subtree(tree->root);
+    bs_tree_free_subtree(tree, tree->root);
     free(tree);
 }
 
@@ -114,14 +126,15 @@ bs_tree_node bs_tree_new_node(void * data) {
 /*!
  * \brief           Frees the resources associated with a subtree.
  * \details         This function frees the node recursively.
+ * \param tree      A pointer to the tree.
  * \param node      A pointer to the tree node at the root of the subtree.
  */
 
-void bs_tree_free_subtree(bs_tree_node node) {
+void bs_tree_free_subtree(bs_tree tree, bs_tree_node node) {
     if ( node ) {
-        free(node->data);
-        bs_tree_free_subtree(node->left);
-        bs_tree_free_subtree(node->right);
+        tree->free_func(node->data);
+        bs_tree_free_subtree(tree, node->left);
+        bs_tree_free_subtree(tree, node->right);
         free(node);
     }
 }

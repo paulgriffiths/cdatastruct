@@ -36,7 +36,8 @@ typedef struct bs_tree_t * bs_tree;
 extern "C" {
 #endif
 
-bs_tree bs_tree_init(int (*cfunc)(const void *, const void *));
+bs_tree bs_tree_init(int (*cfunc)(const void *, const void *),
+                     void (*free_func)(void *));
 void bs_tree_free(bs_tree tree);
 
 bool bs_tree_isempty(const bs_tree tree);
