@@ -36,6 +36,9 @@ bool bst_map_insert(bst_map map, const char * key, void * value);
 bool bst_map_search(const bst_map map, const char * key);
 void * bst_map_search_data(const bst_map map, const char * key);
 
+void bst_map_lock(bst_map map);
+void bst_map_unlock(bst_map map);
+
 #ifdef __cplusplus
 }
 #endif

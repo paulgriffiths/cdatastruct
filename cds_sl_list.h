@@ -63,6 +63,9 @@ sl_list_itr sl_list_first(const sl_list list);
 sl_list_itr sl_list_next(const sl_list_itr itr);
 sl_list_itr sl_list_itr_from_index(const sl_list list, const size_t index);
 
+void sl_list_lock(sl_list list);
+void sl_list_unlock(sl_list list);
+
 #ifdef __cplusplus
 }
 #endif

@@ -14,11 +14,25 @@
 #include "cds_bs_tree.h"
 
 
+#ifdef CDS_THREAD_SUPPORT
+
+  /*!
+   * \brief         Enable POSIX library.
+   */
+
+  #define _POSIX_C_SOURCE 200809L
+  #include <pthread.h>
+#endif
+
+
 /*!
  * \brief           Struct to contain a binary search tree.
  */
 
 typedef struct bs_tree_t {
+#ifdef CDS_THREAD_SUPPORT
+    pthread_mutex_t mutex;              /*!< Mutex */
+#endif
     struct bs_tree_node_t * root;       /*!< Pointer to root node */
     size_t length;                      /*!< Length of list */
     int (*cfunc)();                     /*!< Pointer to compare function */

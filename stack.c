@@ -89,3 +89,23 @@ void * stack_pop(stack stk) {
 void stack_push(stack stk, void * data) {
     sl_list_prepend(stk, data);
 }
+
+
+/*!
+ * \brief           Locks a stack's mutex.
+ * \param stk       A pointer to the stack.
+ */
+
+void stack_lock(stack stk) {
+    sl_list_lock(stk);
+}
+
+
+/*!
+ * \brief           Unlocks a stack's mutex.
+ * \param stk       A pointer to the stack.
+ */
+
+void stack_unlock(stack stk) {
+    sl_list_unlock(stk);
+}

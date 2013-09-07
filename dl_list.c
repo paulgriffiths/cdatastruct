@@ -14,6 +14,12 @@
 #include "cds_common.h"
 #include "dl_list.h"
 
+
+#ifdef CDS_THREAD_SUPPORT
+  #include <pthread.h>
+#endif
+
+
 /*!
  * \brief           Initializes a new doubly linked list.
  * \param cfunc     A pointer to a compare function. The function should
@@ -35,11 +41,20 @@ dl_list dl_list_init(int (*cfunc)(const void *, const void *),
     new_list->back = NULL;
     new_list->length = 0;
     new_list->cfunc = cfunc;
+
     if ( free_func) {
         new_list->free_func = free_func;
     } else {
         new_list->free_func = free;
     }
+
+#ifdef CDS_THREAD_SUPPORT
+    int status = pthread_mutex_init(&new_list->mutex, NULL);
+    if ( status != 0 ) {
+        fputs("cdatastruct error: couldn't initialize mutex", stderr);
+        exit(EXIT_FAILURE);
+    }
+#endif
 
     return new_list;
 }
@@ -54,6 +69,14 @@ void dl_list_free(dl_list list) {
     while ( list->front ) {
         dl_list_delete_at(list, 0);
     }
+
+#ifdef CDS_THREAD_SUPPORT
+    int status = pthread_mutex_destroy(&list->mutex);
+    if ( status != 0 ) {
+        fputs("cdatastruct error: couldn't destroy mutex", stderr);
+    }
+#endif
+
     free(list);
 }
 
@@ -624,4 +647,40 @@ void dl_list_find(const dl_list list, const void * data,
     if ( p_index ) {
         *p_index = found ? index : CDSERR_NOTFOUND;
     }
+}
+
+
+/*!
+ * \brief           Locks a list's mutex.
+ * \param list      A pointer to the list.
+ */
+
+void dl_list_lock(dl_list list) {
+#ifdef CDS_THREAD_SUPPORT
+    int status = pthread_mutex_lock(&list->mutex);
+    if ( status != 0 ) {
+        fputs("cdatastruct error: couldn't lock mutex.", stderr);
+        exit(EXIT_FAILURE);
+    }
+#else
+    (void) list;        /*  Avoid unused parameter warning  */
+#endif
+}
+
+
+/*!
+ * \brief           Unlocks a list's mutex.
+ * \param list      A pointer to the list.
+ */
+
+void dl_list_unlock(dl_list list) {
+#ifdef CDS_THREAD_SUPPORT
+    int status = pthread_mutex_unlock(&list->mutex);
+    if ( status != 0 ) {
+        fputs("cdatastruct error: couldn't lock mutex.", stderr);
+        exit(EXIT_FAILURE);
+    }
+#else
+    (void) list;        /*  Avoid unused parameter warning  */
+#endif
 }

@@ -33,6 +33,9 @@ bool stack_isempty(const stack stk);
 void * stack_pop(stack stk);
 void stack_push(stack stk, void * data);
 
+void stack_lock(stack stk);
+void stack_unlock(stack stk);
+
 #ifdef __cplusplus
 }
 #endif

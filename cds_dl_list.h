@@ -68,6 +68,9 @@ dl_list_itr dl_list_next(const dl_list_itr itr);
 dl_list_itr dl_list_prev(const dl_list_itr itr);
 dl_list_itr dl_list_itr_from_index(const dl_list list, const size_t index);
 
+void dl_list_lock(dl_list list);
+void dl_list_unlock(dl_list list);
+
 #ifdef __cplusplus
 }
 #endif

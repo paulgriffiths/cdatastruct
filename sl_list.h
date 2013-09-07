@@ -14,11 +14,25 @@
 #include "cds_sl_list.h"
 
 
+#ifdef CDS_THREAD_SUPPORT
+
+  /*!
+   * \brief         Enables POSIX library.
+   */
+
+  #define _POSIX_C_SOURCE 200809L
+  #include <pthread.h>
+#endif
+
+
 /*!
  * \brief           Struct to contain a list.
  */
 
 typedef struct sl_list_t {
+#ifdef CDS_THREAD_SUPPORT
+    pthread_mutex_t mutex;              /*!< Mutex */
+#endif
     struct sl_list_node_t * front;      /*!< Pointer to first node */
     size_t length;                      /*!< Length of list */
     int (*cfunc)();                     /*!< Pointer to compare function */

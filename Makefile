@@ -32,7 +32,7 @@ CXX=g++
 ARFLAGS=rcs
 
 # Compiler flags
-CFLAGS=-std=c99 -pedantic -Wall -Wextra
+CFLAGS=-std=c99 -pedantic -Wall -Wextra -DCDS_THREAD_SUPPORT
 C_DEBUG_FLAGS=-ggdb -DDEBUG -DDEBUG_ALL
 C_RELEASE_FLAGS=-O3 -DNDEBUG
 CXXFLAGS=-std=c++11 -pedantic -Wall -Wextra -Weffc++

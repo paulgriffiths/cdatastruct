@@ -183,3 +183,23 @@ bool bst_map_insert(bst_map map, const char * key, void * value) {
     kvpair new_pair = new_kvpair(key, value);
     return bs_tree_insert_subtree(map, &map->root, new_pair);
 }
+
+
+/*!
+ * \brief           Locks a map's mutex.
+ * \param map       A pointer to the map.
+ */
+
+void bst_map_lock(bst_map map) {
+    bs_tree_lock(map);
+}
+
+
+/*!
+ * \brief           Unlocks a map's mutex.
+ * \param map       A pointer to the map.
+ */
+
+void bst_map_unlock(bst_map map) {
+    bs_tree_unlock(map);
+}

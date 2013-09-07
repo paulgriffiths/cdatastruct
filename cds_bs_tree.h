@@ -47,6 +47,9 @@ bool bs_tree_insert(bs_tree tree, void * data);
 bool bs_tree_search(const bs_tree tree, const void * data);
 void * bs_tree_search_data(const bs_tree tree, const void * data);
 
+void bs_tree_lock(bs_tree tree);
+void bs_tree_unlock(bs_tree tree);
+
 #ifdef __cplusplus
 }
 #endif

@@ -7,11 +7,18 @@
  */
 
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <paulgrif/chelpers.h>
 #include "cds_common.h"
 #include "sl_list.h"
+
+
+#ifdef CDS_THREAD_SUPPORT
+  #include <pthread.h>
+#endif
+
 
 /*!
  * \brief           Initializes a new singly linked list.
@@ -32,11 +39,21 @@ sl_list sl_list_init(int (*cfunc)(const void *, const void *),
     new_list->front = NULL;
     new_list->length = 0;
     new_list->cfunc = cfunc;
+
     if ( free_func ) {
         new_list->free_func = free_func;
     } else {
         new_list->free_func = free;
     }
+
+#ifdef CDS_THREAD_SUPPORT
+    int status = pthread_mutex_init(&new_list->mutex, NULL);
+    if ( status != 0 ) {
+        fputs("cdatastruct error: couldn't initialize mutex", stderr);
+        exit(EXIT_FAILURE);
+    }
+#endif
+
     return new_list;
 }
 
@@ -50,6 +67,14 @@ void sl_list_free(sl_list list) {
     while ( list->front ) {
         sl_list_delete_at(list, 0);
     }
+
+#ifdef CDS_THREAD_SUPPORT
+    int status = pthread_mutex_destroy(&list->mutex);
+    if ( status != 0 ) {
+        fputs("cdatastruct error: couldn't destroy mutex", stderr);
+    }
+#endif
+
     free(list);
 }
 
@@ -341,4 +366,40 @@ void sl_list_find(const sl_list list, const void * data,
     if ( p_index ) {
         *p_index = found ? index : CDSERR_NOTFOUND;
     }
+}
+
+
+/*!
+ * \brief           Locks a list's mutex.
+ * \param list      A pointer to the list.
+ */
+
+void sl_list_lock(sl_list list) {
+#ifdef CDS_THREAD_SUPPORT
+    int status = pthread_mutex_lock(&list->mutex);
+    if ( status != 0 ) {
+        fputs("cdatastruct error: couldn't lock mutex.", stderr);
+        exit(EXIT_FAILURE);
+    }
+#else
+    (void) list;        /*  Avoid unused parameter warning  */
+#endif
+}
+
+
+/*!
+ * \brief           Unlocks a list's mutex.
+ * \param list      A pointer to the list.
+ */
+
+void sl_list_unlock(sl_list list) {
+#ifdef CDS_THREAD_SUPPORT
+    int status = pthread_mutex_unlock(&list->mutex);
+    if ( status != 0 ) {
+        fputs("cdatastruct error: couldn't lock mutex.", stderr);
+        exit(EXIT_FAILURE);
+    }
+#else
+    (void) list;        /*  Avoid unused parameter warning  */
+#endif
 }

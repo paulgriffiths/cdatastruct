@@ -33,6 +33,9 @@ bool queue_isempty(const queue que);
 void * queue_pop(queue que);
 void queue_pushback(queue que, void * data);
 
+void queue_lock(queue que);
+void queue_unlock(queue que);
+
 #ifdef __cplusplus
 }
 #endif

@@ -89,3 +89,23 @@ void * queue_pop(queue que) {
 void queue_pushback(queue que, void * data) {
     dl_list_append(que, data);
 }
+
+
+/*!
+ * \brief           Locks a queue's mutex.
+ * \param que       A pointer to the queue.
+ */
+
+void queue_lock(queue que) {
+    dl_list_lock(que);
+}
+
+
+/*!
+ * \brief           Unlocks a queue's mutex.
+ * \param que       A pointer to the queue.
+ */
+
+void queue_unlock(queue que) {
+    dl_list_unlock(que);
+}

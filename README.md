@@ -4,7 +4,8 @@ cdatastruct
 What is it?
 -----------
 
-**cdatastruct** is C library of generic, basic data structures.
+**cdatastruct** is C library of generic, basic data structures. They can
+be used with any built-in or user-defined data types.
 
 Structures currently implemented are:
 - Singly linked, single ended list;

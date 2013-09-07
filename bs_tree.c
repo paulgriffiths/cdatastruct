@@ -7,11 +7,18 @@
  */
 
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <paulgrif/chelpers.h>
 #include "cds_common.h"
 #include "bs_tree.h"
+
+
+#ifdef CDS_THREAD_SUPPORT
+  #include <pthread.h>
+#endif
+
 
 /*!
  * \brief           Initializes a new binary search tree.
@@ -40,6 +47,15 @@ bs_tree bs_tree_init(int (*cfunc)(const void *, const void *),
     } else {
         new_tree->free_func = free;
     }
+
+#ifdef CDS_THREAD_SUPPORT
+    int status = pthread_mutex_init(&new_tree->mutex, NULL);
+    if ( status != 0 ) {
+        fputs("cdatastruct error: couldn't initialize mutex", stderr);
+        exit(EXIT_FAILURE);
+    }
+#endif
+
     return new_tree;
 }
 
@@ -51,6 +67,14 @@ bs_tree bs_tree_init(int (*cfunc)(const void *, const void *),
 
 void bs_tree_free(bs_tree tree) {
     bs_tree_free_subtree(tree, tree->root);
+
+#ifdef CDS_THREAD_SUPPORT
+    int status = pthread_mutex_destroy(&tree->mutex);
+    if ( status != 0 ) {
+        fputs("cdatastruct error: couldn't destroy mutex", stderr);
+    }
+#endif
+
     free(tree);
 }
 
@@ -276,4 +300,40 @@ bs_tree_node bst_insert_search(bs_tree tree, void * data, bool * found) {
     }
 
     return (*found) ? searchnode : last_try;
+}
+
+
+/*!
+ * \brief           Locks a tree's mutex.
+ * \param tree      A pointer to the tree.
+ */
+
+void bs_tree_lock(bs_tree tree) {
+#ifdef CDS_THREAD_SUPPORT
+    int status = pthread_mutex_lock(&tree->mutex);
+    if ( status != 0 ) {
+        fputs("cdatastruct error: couldn't lock mutex.", stderr);
+        exit(EXIT_FAILURE);
+    }
+#else
+    (void) tree;        /*  Avoid unused parameter warning  */
+#endif
+}
+
+
+/*!
+ * \brief           Unlocks a tree's mutex.
+ * \param tree      A pointer to the tree.
+ */
+
+void bs_tree_unlock(bs_tree tree) {
+#ifdef CDS_THREAD_SUPPORT
+    int status = pthread_mutex_unlock(&tree->mutex);
+    if ( status != 0 ) {
+        fputs("cdatastruct error: couldn't lock mutex.", stderr);
+        exit(EXIT_FAILURE);
+    }
+#else
+    (void) tree;        /*  Avoid unused parameter warning  */
+#endif
 }
