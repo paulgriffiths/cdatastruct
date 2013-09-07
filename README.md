@@ -4,7 +4,15 @@ cdatastruct
 What is it?
 -----------
 
-**cdatastruct** is C project.
+**cdatastruct** is C library of generic, basic data structures.
+
+Structures currently implemented are:
+- Singly linked, single ended list;
+- Stack, based on singly linked, single ended list;
+- Doubly linked, double ended list;
+- Queue, based on doubly linked, double ended list;
+- Binary search tree;
+- Map, based on binary search tree.
 
 Who maintains it?
 -----------------
@@ -22,7 +30,11 @@ Up-to-date documentation can be found at
 
 Installation
 ------------
-**cdatastruct** is written in C.
+**cdatastruct** is written in C. Type `make` and `make install` to build
+and install the library. Link with `-lcdatastruct -lchelpers`.
+
+This library requires installation of my C helper functions library at
+<https://github.com/paulgriffiths/chelpers>.
 
 Licensing
 ---------
