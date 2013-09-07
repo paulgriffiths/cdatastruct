@@ -103,13 +103,7 @@ int sl_list_insert_at(sl_list list, const size_t index, void * data) {
         list->front = new_node;
         ++list->length;
     } else {
-        size_t i = index;
-        sl_list_node before = list->front;
-
-        while ( --i ) {
-            before = before->next;
-        }
-
+        sl_list_itr before = sl_list_itr_from_index(list, index - 1);
         sl_list_insert_after(list, before, data);
     }
     
