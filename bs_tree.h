@@ -38,11 +38,11 @@ typedef struct bs_tree_node_t * bs_tree_node;
 extern "C" {
 #endif
 
+bs_tree_node bs_tree_new_node(void * data);
 void bs_tree_free_subtree(bs_tree_node node);
-bs_tree_node bs_tree_search_subtree(bs_tree tree,
-        bs_tree_node node, void * key);
+bs_tree_node bs_tree_search_node(bs_tree tree, void * key);
 bool bs_tree_insert_subtree(bs_tree tree, bs_tree_node * p_node, void * data);
-bs_tree_node bst_insert_search(bs_tree tree, bs_tree_node node, void * key);
+bs_tree_node bst_insert_search(bs_tree tree, void * key);
 
 #ifdef __cplusplus
 }

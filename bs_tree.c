@@ -66,6 +66,52 @@ bool bs_tree_isempty(const bs_tree tree) {
 
 
 /*!
+ * \brief           Searches a tree for a piece of data.
+ * \param tree      A pointer to the tree.
+ * \param data      The data for which to search.
+ * \returns         `true` is the data is found, `false` otherwise.
+ */
+
+bool bs_tree_search(bs_tree tree, void * data) {
+    bs_tree_node node = bs_tree_search_node(tree, data);
+    return node ? true : false;
+}
+
+
+/*!
+ * \brief           Inserts data into a tree.
+ * \details         No duplicates are allowed in a binary search tree,
+ * so data will only be inserted in the data is not already found in
+ * the tree. Since `data` points to dynamically allocated memory, the
+ * caller should check the return from this function, and if it returns
+ * `false`, it should probably `free()` the data which was not inserted.
+ * \param tree      A pointer to the tree.
+ * \param data      The data to insert.
+ * \returns         `true` if the data was succesfully inserted, `false`
+ * if that data was already present in the tree.
+ */
+
+bool bs_tree_insert(bs_tree tree, void * data) {
+    return bs_tree_insert_subtree(tree, &tree->root, data);
+}
+
+
+/*!
+ * \brief           Creates and allocates memory for a new node.
+ * \param data      The data for the new node.
+ * \returns         A pointer to the newly-created node.
+ */
+
+bs_tree_node bs_tree_new_node(void * data) {
+    bs_tree_node new_node = term_malloc(sizeof(*new_node));
+    new_node->data = data;
+    new_node->left = NULL;
+    new_node->right = NULL;
+    return new_node;
+}
+
+
+/*!
  * \brief           Frees the resources associated with a subtree.
  * \details         This function frees the node recursively.
  * \param node      A pointer to the tree node at the root of the subtree.
@@ -84,41 +130,13 @@ void bs_tree_free_subtree(bs_tree_node node) {
 /*!
  * \brief           Searches a tree for a piece of data.
  * \param tree      A pointer to the tree.
- * \param data      The data for which to search.
- * \returns         `true` is the data is found, `false` otherwise.
- */
-
-bool bs_tree_search(bs_tree tree, void * data) {
-    bool found = bs_tree_search_subtree(tree, tree->root, data);
-    return found;
-}
-
-
-/*!
- * \brief           Inserts data into a tree.
- * \param tree      A pointer to the tree.
- * \param data      The data to insert.
- * \returns         `true` if the data was succesfully inserted, `false`
- * if that data was already present in the tree.
- */
-
-bool bs_tree_insert(bs_tree tree, void * data) {
-    return bs_tree_insert_subtree(tree, &tree->root, data);
-}
-
-
-/*!
- * \brief           Searches a subtree for a piece of data.
- * \param tree      A pointer to the tree.
- * \param node      A pointer to the node at the root of the subtree.
  * \param data      A pointer to the data for which to search.
  * \returns         A pointer to the node in which the data was found,
  * or `NULL` if the data was not found.
  */
 
-bs_tree_node bs_tree_search_subtree(bs_tree tree,
-        bs_tree_node node, void * data) {
-    bs_tree_node searchnode = node;
+bs_tree_node bs_tree_search_node(bs_tree tree, void * data) {
+    bs_tree_node searchnode = tree->root;
     bool found = false;
     int compare;
 
@@ -139,6 +157,8 @@ bs_tree_node bs_tree_search_subtree(bs_tree tree,
 
 /*!
  * \brief           Inserts a data element into a subtree.
+ * \details         The data element is only inserted if it does not
+ * already exist in the tree, i.e. no duplicates are allowed.
  * \param tree      A pointer to the tree
  * \param p_node    A pointer to the pointer to the node at the root of the
  * subtree.
@@ -148,15 +168,21 @@ bs_tree_node bs_tree_search_subtree(bs_tree tree,
  */
 
 bool bs_tree_insert_subtree(bs_tree tree, bs_tree_node * p_node, void * data) {
-    bs_tree_node last_node = bst_insert_search(tree, *p_node, data);
-    bs_tree_node new_node;
+    bs_tree_node last_node = bst_insert_search(tree, data);
     bool inserted = false;
 
+    /*
+     *  Insert only if:
+     *   - `last_node` is not `NULL`. If it is, bst_insert_search()
+     *     found the data already in the tree; or
+     *   - `*p_node` is `NULL`, in which case the tree is empty and
+     *     the data obviously is not in the tree.
+     */
+
     if ( last_node || !(*p_node) ) {
-        new_node = term_malloc(sizeof(*new_node));
-        new_node->data = data;
-        new_node->left = NULL;
-        new_node->right = NULL;
+        bs_tree_node new_node = bs_tree_new_node(data);
+        inserted = true;
+        ++tree->length;
 
         if ( *p_node ) {
             int compare = tree->cfunc(data, last_node->data);
@@ -168,9 +194,6 @@ bool bs_tree_insert_subtree(bs_tree tree, bs_tree_node * p_node, void * data) {
         } else {
             *p_node = new_node;
         }
-
-        ++tree->length;
-        inserted = true;
     }
 
     return inserted;
@@ -183,24 +206,26 @@ bool bs_tree_insert_subtree(bs_tree tree, bs_tree_node * p_node, void * data) {
  * and if it is not found, returns a pointer to the node under which
  * it should be inserted.
  * \param tree  A pointer to the tree.
- * \param node  A pointer to the node at the root of the tree.
  * \param data  A pointer to the data for which to search.
  * \returns     `NULL` if the data was found and is already in the tree,
  * or a pointer to the last node tried if the data is not present.
  */
 
-bs_tree_node bst_insert_search(bs_tree tree, bs_tree_node node, void * data) {
-    bs_tree_node searchnode = node;
-    bs_tree_node last_try = node;
+bs_tree_node bst_insert_search(bs_tree tree, void * data) {
+    bs_tree_node searchnode = tree->root;
+    bs_tree_node last_try = tree->root;
     bool found = false;
-    int compare;
+
+    /*  Return NULL if tree is empty  */
 
     if ( !searchnode ) {
         return NULL;
     }
 
+    /*  Search tree for data  */
+
     while ( !found && searchnode ) {
-        compare = tree->cfunc(data, searchnode->data);
+        int compare = tree->cfunc(data, searchnode->data);
         if ( !compare ) {
             found = true;
         } else if ( compare < 0 ) {
