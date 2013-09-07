@@ -78,7 +78,7 @@ bool bs_tree_isempty(const bs_tree tree) {
 
 
 /*!
- * \brief           Searches a tree for a piece of data.
+ * \brief           Determines if a data element is in a tree.
  * \param tree      A pointer to the tree.
  * \param data      The data for which to search.
  * \returns         `true` is the data is found, `false` otherwise.
@@ -91,16 +91,35 @@ bool bs_tree_search(bs_tree tree, void * data) {
 
 
 /*!
+ * \brief           Searches a tree for a piece of data and returns it.
+ * \param tree      A pointer to the tree.
+ * \param data      The data for which to search.
+ * \returns         A pointer to the data if found, `NULL` otherwise.
+ */
+
+void * bs_tree_search_data(bs_tree tree, void * data) {
+    void * return_data;
+    bs_tree_node node = bs_tree_search_node(tree, data);
+    if ( node ) {
+        return_data = node->data;
+    } else {
+        return_data = NULL;
+    }
+
+    return return_data;
+}
+
+
+/*!
  * \brief           Inserts data into a tree.
- * \details         No duplicates are allowed in a binary search tree,
- * so data will only be inserted in the data is not already found in
- * the tree. Since `data` points to dynamically allocated memory, the
- * caller should check the return from this function, and if it returns
- * `false`, it should probably `free()` the data which was not inserted.
+ * \details         Duplicated data is replaced. This is a superfluous
+ * operation for scalar data, but is necessary for structs, where
+ * 'found' may mean only one element of the struct compares equal,
+ * and other elements may be different (e.g. a map data structure).
  * \param tree      A pointer to the tree.
  * \param data      The data to insert.
- * \returns         `true` if the data was succesfully inserted, `false`
- * if that data was already present in the tree.
+ * \returns         `true` if the data was already in the tree and has
+ * been replaced, `false` if it was not present and newly added.
  */
 
 bool bs_tree_insert(bs_tree tree, void * data) {
@@ -170,46 +189,48 @@ bs_tree_node bs_tree_search_node(bs_tree tree, void * data) {
 
 /*!
  * \brief           Inserts a data element into a subtree.
- * \details         The data element is only inserted if it does not
- * already exist in the tree, i.e. no duplicates are allowed.
+ * \details         The data element is replaced if it is found in the tree.
+ * This is a superfluous operation for scalar data, but is necessary for
+ * structs, where 'found' may mean only one of the struct members compares
+ * equal, and other data elements may differ. This function `free()`s the
+ * old data when this happens.
  * \param tree      A pointer to the tree
  * \param p_node    A pointer to the pointer to the node at the root of the
  * subtree.
  * \param data      A pointer to the data to which to insert.
- * \returns         `true` if the data was successfully inserted, `false`
- * if the data was already present in the subtree.
+ * \returns         `true` if the data was present and duplicated,
+ * 'false' if not.
  */
 
 bool bs_tree_insert_subtree(bs_tree tree, bs_tree_node * p_node, void * data) {
-    bs_tree_node last_node = bst_insert_search(tree, data);
-    bool inserted = false;
+    bool duplicate = false;
 
-    /*
-     *  Insert only if:
-     *   - `last_node` is not `NULL`. If it is, bst_insert_search()
-     *     found the data already in the tree; or
-     *   - `*p_node` is `NULL`, in which case the tree is empty and
-     *     the data obviously is not in the tree.
-     */
+    if ( *p_node ) {
+        bs_tree_node node = bst_insert_search(tree, data, &duplicate);
 
-    if ( last_node || !(*p_node) ) {
-        bs_tree_node new_node = bs_tree_new_node(data);
-        inserted = true;
-        ++tree->length;
-
-        if ( *p_node ) {
-            int compare = tree->cfunc(data, last_node->data);
+        if ( !duplicate ) {
+            bs_tree_node new_node = bs_tree_new_node(data);
+            int compare = tree->cfunc(data, node->data);
             if ( compare < 0 ) {
-                last_node->left = new_node;
+                node->left = new_node;
             } else {
-                last_node->right = new_node;
+                node->right = new_node;
             }
+            ++tree->length;
         } else {
-            *p_node = new_node;
+            tree->free_func(node->data);
+            node->data = data;
         }
+    } else {
+        
+        /*  Tree is empty  */
+
+        bs_tree_node new_node = bs_tree_new_node(data);
+        *p_node = new_node;
+        ++tree->length;
     }
 
-    return inserted;
+    return duplicate;
 }
 
 
@@ -220,14 +241,18 @@ bool bs_tree_insert_subtree(bs_tree tree, bs_tree_node * p_node, void * data) {
  * it should be inserted.
  * \param tree  A pointer to the tree.
  * \param data  A pointer to the data for which to search.
- * \returns     `NULL` if the data was found and is already in the tree,
- * or a pointer to the last node tried if the data is not present.
+ * \param found A pointer to a `bool` to populate according to whether
+ * the data is already in the tree.
+ * \returns     A pointer to the node in which the data was found, if
+ * it was found, or a pointer to the last node tried if it was not.
+ * The last tried node is the one under which the new data should be
+ * inserted, if it is not already in the tree.
  */
 
-bs_tree_node bst_insert_search(bs_tree tree, void * data) {
+bs_tree_node bst_insert_search(bs_tree tree, void * data, bool * found) {
     bs_tree_node searchnode = tree->root;
     bs_tree_node last_try = tree->root;
-    bool found = false;
+    *found = false;
 
     /*  Return NULL if tree is empty  */
 
@@ -237,10 +262,10 @@ bs_tree_node bst_insert_search(bs_tree tree, void * data) {
 
     /*  Search tree for data  */
 
-    while ( !found && searchnode ) {
+    while ( !(*found) && searchnode ) {
         int compare = tree->cfunc(data, searchnode->data);
         if ( !compare ) {
-            found = true;
+            *found = true;
         } else if ( compare < 0 ) {
             last_try = searchnode;
             searchnode = searchnode->left;
@@ -250,5 +275,5 @@ bs_tree_node bst_insert_search(bs_tree tree, void * data) {
         }
     }
 
-    return found ? NULL : last_try;
+    return (*found) ? searchnode : last_try;
 }

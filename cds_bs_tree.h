@@ -45,6 +45,7 @@ size_t bs_tree_length(const bs_tree tree);
 
 bool bs_tree_insert(bs_tree tree, void * data);
 bool bs_tree_search(bs_tree tree, void * data);
+void * bs_tree_search_data(bs_tree tree, void * data);
 
 #ifdef __cplusplus
 }

@@ -50,24 +50,24 @@ BOOST_AUTO_TEST_CASE(bs_tree_insert_search_test) {
 
 BOOST_AUTO_TEST_CASE(bs_tree_insert_existing_test) {
     bs_tree tree = bs_tree_init(cds_compare_string, NULL);
+    bool test_result;
 
-    bs_tree_insert(tree, cds_new_string("bacon"));
+    test_result = bs_tree_insert(tree, cds_new_string("bacon"));
+    BOOST_CHECK(test_result == false);
+
     bs_tree_insert(tree, cds_new_string("eggs"));
     bs_tree_insert(tree, cds_new_string("spam"));
     bs_tree_insert(tree, cds_new_string("cheese"));
-    bs_tree_insert(tree, cds_new_string("gruel"));
-
-    BOOST_CHECK_EQUAL(bs_tree_length(tree), 5);
-
-    bool test_result;
-
-    void * data = cds_new_string("spam");
-    test_result = bs_tree_insert(tree, data);
+    test_result = bs_tree_insert(tree, cds_new_string("gruel"));
     BOOST_CHECK(test_result == false);
 
     BOOST_CHECK_EQUAL(bs_tree_length(tree), 5);
 
-    free(data);
+    test_result = bs_tree_insert(tree, cds_new_string("spam"));
+    BOOST_CHECK(test_result == true);
+
+    BOOST_CHECK_EQUAL(bs_tree_length(tree), 5);
+
     bs_tree_free(tree);
 }
 
