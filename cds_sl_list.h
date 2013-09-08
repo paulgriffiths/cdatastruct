@@ -11,6 +11,7 @@
 #define PG_CDS_SINGLY_LINKED_LIST_H
 
 #include <stddef.h>
+#include <stdbool.h>
 
 /*!
  * \brief           Struct for singly linked list node.
