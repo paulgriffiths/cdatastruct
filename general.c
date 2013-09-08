@@ -66,6 +66,58 @@ void * cds_new_ulong(const unsigned long n) {
 
 
 /*!
+ * \brief           Dynamically allocates memory for a new `long long`.
+ * \param n         The new `long long` for which to allocate.
+ * \returns         A `void` pointer to the allocated memory.
+ */
+
+void * cds_new_longlong(const long long n) {
+    long long * p_longlong = term_malloc(sizeof(*p_longlong));
+    *p_longlong = n;
+    return p_longlong;
+}
+
+
+/*!
+ * \brief           Allocates memory for a new `unsigned long long`.
+ * \param n         The new `unsigned long long` for which to allocate.
+ * \returns         A `void` pointer to the allocated memory.
+ */
+
+void * cds_new_ulonglong(const unsigned long long n) {
+    unsigned long long * p_longlong = term_malloc(sizeof(*p_longlong));
+    *p_longlong = n;
+    return p_longlong;
+}
+
+
+/*!
+ * \brief           Dynamically allocates memory for a new `float`.
+ * \param f         The new `float` for which to allocate.
+ * \returns         A `void` pointer to the allocated memory.
+ */
+
+void * cds_new_float(const float f) {
+    float * p_float = term_malloc(sizeof(*p_float));
+    *p_float = f;
+    return p_float;
+}
+
+
+/*!
+ * \brief           Dynamically allocates memory for a new `double`.
+ * \param f         The new `double` for which to allocate.
+ * \returns         A `void` pointer to the allocated memory.
+ */
+
+void * cds_new_double(const double f) {
+    double * p_double = term_malloc(sizeof(*p_double));
+    *p_double = f;
+    return p_double;
+}
+
+
+/*!
  * \brief           Dynamically allocates memory for a new string.
  * \param str       The new string for which to allocate.
  * \returns         A `void` pointer to the allocated memory.
@@ -168,6 +220,110 @@ int cds_compare_ulong(const void * data, const void * cmp) {
     int result;
     unsigned long n_data = *((unsigned long *) data);
     unsigned long n_cmp = *((unsigned long *) cmp);
+
+    if ( n_data < n_cmp ) {
+        result = -1;
+    } else if ( n_data > n_cmp ) {
+        result = 1;
+    } else {
+        result = 0;
+    }
+
+    return result;
+}
+
+
+/*!
+ * \brief           Compares two `long long` via `void` pointers.
+ * \param data      Pointer to the data to which to compare.
+ * \param cmp       Pointer to the comparison data.
+ * \returns         -1 if the comparison data is greater than the data,
+ * 1 if the comparison data is less than the data, and 0 if the comparison
+ * data is equal to the data.
+ */
+
+int cds_compare_longlong(const void * data, const void * cmp) {
+    int result;
+    long long n_data = *((long long *) data);
+    long long n_cmp = *((long long *) cmp);
+
+    if ( n_data < n_cmp ) {
+        result = -1;
+    } else if ( n_data > n_cmp ) {
+        result = 1;
+    } else {
+        result = 0;
+    }
+
+    return result;
+}
+
+
+/*!
+ * \brief           Compares two `unsigned long long` via `void` pointers.
+ * \param data      Pointer to the data to which to compare.
+ * \param cmp       Pointer to the comparison data.
+ * \returns         -1 if the comparison data is greater than the data,
+ * 1 if the comparison data is less than the data, and 0 if the comparison
+ * data is equal to the data.
+ */
+
+int cds_compare_ulonglong(const void * data, const void * cmp) {
+    int result;
+    unsigned long long n_data = *((unsigned long long *) data);
+    unsigned long long n_cmp = *((unsigned long long *) cmp);
+
+    if ( n_data < n_cmp ) {
+        result = -1;
+    } else if ( n_data > n_cmp ) {
+        result = 1;
+    } else {
+        result = 0;
+    }
+
+    return result;
+}
+
+
+/*!
+ * \brief           Compares two `float` via `void` pointers.
+ * \param data      Pointer to the data to which to compare.
+ * \param cmp       Pointer to the comparison data.
+ * \returns         -1 if the comparison data is greater than the data,
+ * 1 if the comparison data is less than the data, and 0 if the comparison
+ * data is equal to the data.
+ */
+
+int cds_compare_float(const void * data, const void * cmp) {
+    int result;
+    float n_data = *((float *) data);
+    float n_cmp = *((float *) cmp);
+
+    if ( n_data < n_cmp ) {
+        result = -1;
+    } else if ( n_data > n_cmp ) {
+        result = 1;
+    } else {
+        result = 0;
+    }
+
+    return result;
+}
+
+
+/*!
+ * \brief           Compares two `double` via `void` pointers.
+ * \param data      Pointer to the data to which to compare.
+ * \param cmp       Pointer to the comparison data.
+ * \returns         -1 if the comparison data is greater than the data,
+ * 1 if the comparison data is less than the data, and 0 if the comparison
+ * data is equal to the data.
+ */
+
+int cds_compare_double(const void * data, const void * cmp) {
+    int result;
+    double n_data = *((double *) data);
+    double n_cmp = *((double *) cmp);
 
     if ( n_data < n_cmp ) {
         result = -1;

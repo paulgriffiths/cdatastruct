@@ -22,12 +22,20 @@ void * cds_new_int(const int n);
 void * cds_new_uint(const unsigned int n);
 void * cds_new_long(const long n);
 void * cds_new_ulong(const unsigned long n);
+void * cds_new_longlong(const long long n);
+void * cds_new_ulonglong(const unsigned long long n);
+void * cds_new_float(const float n);
+void * cds_new_double(const double n);
 void * cds_new_string(const char * str);
 
 int cds_compare_int(const void * data, const void * cmp);
 int cds_compare_uint(const void * data, const void * cmp);
 int cds_compare_long(const void * data, const void * cmp);
 int cds_compare_ulong(const void * data, const void * cmp);
+int cds_compare_longlong(const void * data, const void * cmp);
+int cds_compare_ulonglong(const void * data, const void * cmp);
+int cds_compare_float(const void * data, const void * cmp);
+int cds_compare_double(const void * data, const void * cmp);
 int cds_compare_string(const void * data, const void * cmp);
 
 #ifdef __cplusplus
