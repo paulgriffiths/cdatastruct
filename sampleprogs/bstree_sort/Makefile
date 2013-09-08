@@ -7,8 +7,8 @@
 # http://www.gnu.org/licenses/
 
 CC=gcc
-CFLAGS=-ansi -pedantic -Wall -Wextra
-LDFLAGS=
+CFLAGS=-std=c11 -pedantic -Wall -Wextra
+LDFLAGS=-lcdatastruct -lchelpers
 
 bstree_sort: bstree_sort.c
 	@echo "Compiling and building $<..."
