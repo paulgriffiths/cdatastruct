@@ -47,6 +47,19 @@ bool bs_tree_insert(bs_tree tree, void * data);
 bool bs_tree_search(const bs_tree tree, const void * data);
 void * bs_tree_search_data(const bs_tree tree, const void * data);
 
+void bs_tree_preorder_left_traverse(bs_tree tree,
+        void (*dfunc)(void *, void * arg), void * arg);
+void bs_tree_inorder_left_traverse(bs_tree tree,
+        void (*dfunc)(void *, void * arg), void * arg);
+void bs_tree_postorder_left_traverse(bs_tree tree,
+        void (*dfunc)(void *, void * arg), void * arg);
+void bs_tree_preorder_right_traverse(bs_tree tree,
+        void (*dfunc)(void *, void * arg), void * arg);
+void bs_tree_inorder_right_traverse(bs_tree tree,
+        void (*dfunc)(void *, void * arg), void * arg);
+void bs_tree_postorder_right_traverse(bs_tree tree,
+        void (*dfunc)(void *, void * arg), void * arg);
+
 void bs_tree_lock(bs_tree tree);
 void bs_tree_unlock(bs_tree tree);
 

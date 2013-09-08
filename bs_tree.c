@@ -152,6 +152,132 @@ bool bs_tree_insert(bs_tree tree, void * data) {
 
 
 /*!
+ * \brief           Performs a preorder left-to-right traversal of a bs_tree.
+ * \param tree      A pointer to the tree.
+ * \param dfunc     A pointer to the function to invoke for each node.
+ * \param arg       A pointer to the argument to pass to `dfunc()`.
+ */
+
+void bs_tree_preorder_left_traverse(bs_tree tree,
+        void (*dfunc)(void *, void * arg), void * arg) {
+    if ( tree ) {
+        bs_tree_preorder_left_traverse_int(tree, tree->root, dfunc, arg);
+    }
+}
+
+
+/*!
+ * \brief           Performs an inorder left-to-right traversal of a bs_tree.
+ * \param tree      A pointer to the tree.
+ * \param dfunc     A pointer to the function to invoke for each node.
+ * \param arg       A pointer to the argument to pass to `dfunc()`.
+ */
+
+void bs_tree_inorder_left_traverse(bs_tree tree,
+        void (*dfunc)(void *, void * arg), void * arg) {
+    if ( tree ) {
+        bs_tree_inorder_left_traverse_int(tree, tree->root, dfunc, arg);
+    }
+}
+
+
+/*!
+ * \brief           Performs a postorder left-to-right traversal of a bs_tree.
+ * \param tree      A pointer to the tree.
+ * \param dfunc     A pointer to the function to invoke for each node.
+ * \param arg       A pointer to the argument to pass to `dfunc()`.
+ */
+
+void bs_tree_postorder_left_traverse(bs_tree tree,
+        void (*dfunc)(void *, void * arg), void * arg) {
+    if ( tree ) {
+        bs_tree_postorder_left_traverse_int(tree, tree->root, dfunc, arg);
+    }
+}
+
+
+/*!
+ * \brief           Performs a preorder right-to-left traversal of a bs_tree.
+ * \param tree      A pointer to the tree.
+ * \param dfunc     A pointer to the function to invoke for each node.
+ * \param arg       A pointer to the argument to pass to `dfunc()`.
+ */
+
+void bs_tree_preorder_right_traverse(bs_tree tree,
+        void (*dfunc)(void *, void * arg), void * arg) {
+    if ( tree ) {
+        bs_tree_preorder_right_traverse_int(tree, tree->root, dfunc, arg);
+    }
+}
+
+
+/*!
+ * \brief           Performs an inorder right-to-left traversal of a bs_tree.
+ * \param tree      A pointer to the tree.
+ * \param dfunc     A pointer to the function to invoke for each node.
+ * \param arg       A pointer to the argument to pass to `dfunc()`.
+ */
+
+void bs_tree_inorder_right_traverse(bs_tree tree,
+        void (*dfunc)(void *, void * arg), void * arg) {
+    if ( tree ) {
+        bs_tree_inorder_right_traverse_int(tree, tree->root, dfunc, arg);
+    }
+}
+
+
+/*!
+ * \brief           Performs a postorder right-to-left traversal of a bs_tree.
+ * \param tree      A pointer to the tree.
+ * \param dfunc     A pointer to the function to invoke for each node.
+ * \param arg       A pointer to the argument to pass to `dfunc()`.
+ */
+
+void bs_tree_postorder_right_traverse(bs_tree tree,
+        void (*dfunc)(void *, void * arg), void * arg) {
+    if ( tree ) {
+        bs_tree_postorder_right_traverse_int(tree, tree->root, dfunc, arg);
+    }
+}
+
+
+/*!
+ * \brief           Locks a tree's mutex.
+ * \param tree      A pointer to the tree.
+ */
+
+void bs_tree_lock(bs_tree tree) {
+#ifdef CDS_THREAD_SUPPORT
+    int status = pthread_mutex_lock(&tree->mutex);
+    if ( status != 0 ) {
+        fputs("cdatastruct error: couldn't lock mutex.", stderr);
+        exit(EXIT_FAILURE);
+    }
+#else
+    (void) tree;        /*  Avoid unused parameter warning  */
+#endif
+}
+
+
+/*!
+ * \brief           Unlocks a tree's mutex.
+ * \param tree      A pointer to the tree.
+ */
+
+void bs_tree_unlock(bs_tree tree) {
+#ifdef CDS_THREAD_SUPPORT
+    int status = pthread_mutex_unlock(&tree->mutex);
+    if ( status != 0 ) {
+        fputs("cdatastruct error: couldn't lock mutex.", stderr);
+        exit(EXIT_FAILURE);
+    }
+#else
+    (void) tree;        /*  Avoid unused parameter warning  */
+#endif
+}
+
+
+/*!
  * \brief           Creates and allocates memory for a new node.
  * \param data      The data for the new node.
  * \returns         A pointer to the newly-created node.
@@ -230,7 +356,7 @@ bool bs_tree_insert_subtree(bs_tree tree, bs_tree_node * p_node, void * data) {
     bool duplicate = false;
 
     if ( *p_node ) {
-        bs_tree_node node = bst_insert_search(tree, data, &duplicate);
+        bs_tree_node node = bs_tree_insert_search(tree, data, &duplicate);
 
         if ( !duplicate ) {
             bs_tree_node new_node = bs_tree_new_node(data);
@@ -273,7 +399,7 @@ bool bs_tree_insert_subtree(bs_tree tree, bs_tree_node * p_node, void * data) {
  * inserted, if it is not already in the tree.
  */
 
-bs_tree_node bst_insert_search(bs_tree tree, void * data, bool * found) {
+bs_tree_node bs_tree_insert_search(bs_tree tree, void * data, bool * found) {
     bs_tree_node searchnode = tree->root;
     bs_tree_node last_try = tree->root;
     *found = false;
@@ -304,36 +430,120 @@ bs_tree_node bst_insert_search(bs_tree tree, void * data, bool * found) {
 
 
 /*!
- * \brief           Locks a tree's mutex.
+ * \brief           Performs a preorder left-to-right traversal of a bs_tree.
+ * \details         This function is called internally by the matching
+ * function that the library user calls.
  * \param tree      A pointer to the tree.
+ * \param node      A pointer to the current node.
+ * \param dfunc     A pointer to the function to invoke for each node.
+ * \param arg       A pointer to the argument to pass to `dfunc()`.
  */
 
-void bs_tree_lock(bs_tree tree) {
-#ifdef CDS_THREAD_SUPPORT
-    int status = pthread_mutex_lock(&tree->mutex);
-    if ( status != 0 ) {
-        fputs("cdatastruct error: couldn't lock mutex.", stderr);
-        exit(EXIT_FAILURE);
+void bs_tree_preorder_left_traverse_int(bs_tree tree, bs_tree_node node,
+        void (*dfunc)(void *, void *), void * arg) {
+    if ( node ) {
+        dfunc(node->data, arg);
+        bs_tree_preorder_left_traverse_int(tree, node->left, dfunc, arg);
+        bs_tree_preorder_left_traverse_int(tree, node->right, dfunc, arg);
     }
-#else
-    (void) tree;        /*  Avoid unused parameter warning  */
-#endif
 }
 
 
 /*!
- * \brief           Unlocks a tree's mutex.
+ * \brief           Performs an inorder left-to-right traversal of a bs_tree.
+ * \details         This function is called internally by the matching
+ * function that the library user calls.
  * \param tree      A pointer to the tree.
+ * \param node      A pointer to the current node.
+ * \param dfunc     A pointer to the function to invoke for each node.
+ * \param arg       A pointer to the argument to pass to `dfunc()`.
  */
 
-void bs_tree_unlock(bs_tree tree) {
-#ifdef CDS_THREAD_SUPPORT
-    int status = pthread_mutex_unlock(&tree->mutex);
-    if ( status != 0 ) {
-        fputs("cdatastruct error: couldn't lock mutex.", stderr);
-        exit(EXIT_FAILURE);
+void bs_tree_inorder_left_traverse_int(bs_tree tree, bs_tree_node node,
+        void (*dfunc)(void *, void *), void * arg) {
+    if ( node ) {
+        bs_tree_inorder_left_traverse_int(tree, node->left, dfunc, arg);
+        dfunc(node->data, arg);
+        bs_tree_inorder_left_traverse_int(tree, node->right, dfunc, arg);
     }
-#else
-    (void) tree;        /*  Avoid unused parameter warning  */
-#endif
+}
+
+
+/*!
+ * \brief           Performs a postorder left-to-right traversal of a bs_tree.
+ * \details         This function is called internally by the matching
+ * function that the library user calls.
+ * \param tree      A pointer to the tree.
+ * \param node      A pointer to the current node.
+ * \param dfunc     A pointer to the function to invoke for each node.
+ * \param arg       A pointer to the argument to pass to `dfunc()`.
+ */
+
+void bs_tree_postorder_left_traverse_int(bs_tree tree, bs_tree_node node,
+        void (*dfunc)(void *, void *), void * arg) {
+    if ( node ) {
+        bs_tree_postorder_left_traverse_int(tree, node->left, dfunc, arg);
+        bs_tree_postorder_left_traverse_int(tree, node->right, dfunc, arg);
+        dfunc(node->data, arg);
+    }
+}
+
+
+/*!
+ * \brief           Performs a preorder right-to-left traversal of a bs_tree.
+ * \details         This function is called internally by the matching
+ * function that the library user calls.
+ * \param tree      A pointer to the tree.
+ * \param node      A pointer to the current node.
+ * \param dfunc     A pointer to the function to invoke for each node.
+ * \param arg       A pointer to the argument to pass to `dfunc()`.
+ */
+
+void bs_tree_preorder_right_traverse_int(bs_tree tree, bs_tree_node node,
+        void (*dfunc)(void *, void *), void * arg) {
+    if ( node ) {
+        dfunc(node->data, arg);
+        bs_tree_preorder_right_traverse_int(tree, node->right, dfunc, arg);
+        bs_tree_preorder_right_traverse_int(tree, node->left, dfunc, arg);
+    }
+}
+
+
+/*!
+ * \brief           Performs an inorder right-to-left traversal of a bs_tree.
+ * \details         This function is called internally by the matching
+ * function that the library user calls.
+ * \param tree      A pointer to the tree.
+ * \param node      A pointer to the current node.
+ * \param dfunc     A pointer to the function to invoke for each node.
+ * \param arg       A pointer to the argument to pass to `dfunc()`.
+ */
+
+void bs_tree_inorder_right_traverse_int(bs_tree tree, bs_tree_node node,
+        void (*dfunc)(void *, void *), void * arg) {
+    if ( node ) {
+        bs_tree_inorder_right_traverse_int(tree, node->right, dfunc, arg);
+        dfunc(node->data, arg);
+        bs_tree_inorder_right_traverse_int(tree, node->left, dfunc, arg);
+    }
+}
+
+
+/*!
+ * \brief           Performs a postorder right-to-left traversal of a bs_tree.
+ * \details         This function is called internally by the matching
+ * function that the library user calls.
+ * \param tree      A pointer to the tree.
+ * \param node      A pointer to the current node.
+ * \param dfunc     A pointer to the function to invoke for each node.
+ * \param arg       A pointer to the argument to pass to `dfunc()`.
+ */
+
+void bs_tree_postorder_right_traverse_int(bs_tree tree, bs_tree_node node,
+        void (*dfunc)(void *, void *), void * arg) {
+    if ( node ) {
+        bs_tree_postorder_right_traverse_int(tree, node->right, dfunc, arg);
+        bs_tree_postorder_right_traverse_int(tree, node->left, dfunc, arg);
+        dfunc(node->data, arg);
+    }
 }

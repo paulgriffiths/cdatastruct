@@ -57,7 +57,20 @@ bs_tree_node bs_tree_new_node(void * data);
 void bs_tree_free_subtree(bs_tree tree, bs_tree_node node);
 bs_tree_node bs_tree_search_node(const bs_tree tree, const void * key);
 bool bs_tree_insert_subtree(bs_tree tree, bs_tree_node * p_node, void * data);
-bs_tree_node bst_insert_search(bs_tree tree, void * key, bool * found);
+bs_tree_node bs_tree_insert_search(bs_tree tree, void * key, bool * found);
+
+void bs_tree_preorder_left_traverse_int(bs_tree tree, bs_tree_node node,
+        void (*dfunc)(void *, void *), void * arg);
+void bs_tree_inorder_left_traverse_int(bs_tree tree, bs_tree_node node,
+        void (*dfunc)(void *, void *), void * arg);
+void bs_tree_postorder_left_traverse_int(bs_tree tree, bs_tree_node node,
+        void (*dfunc)(void *, void *), void * arg);
+void bs_tree_preorder_right_traverse_int(bs_tree tree, bs_tree_node node,
+        void (*dfunc)(void *, void *), void * arg);
+void bs_tree_inorder_right_traverse_int(bs_tree tree, bs_tree_node node,
+        void (*dfunc)(void *, void *), void * arg);
+void bs_tree_postorder_right_traverse_int(bs_tree tree, bs_tree_node node,
+        void (*dfunc)(void *, void *), void * arg);
 
 #ifdef __cplusplus
 }
