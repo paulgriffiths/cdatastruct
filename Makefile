@@ -21,7 +21,8 @@ INC_INSTALL_PREFIX=paulgrif
 INC_INSTALL_PATH=$(HOME)/include/$(INC_INSTALL_PREFIX)
 LIB_INSTALL_PATH=$(HOME)/lib/c
 INSTALLHEADERS=cdatastruct.h cds_common.h cds_general.h cds_sl_list.h
-INSTALLHEADERS+=cds_stack.h cds_dl_list.h cds_queue.h
+INSTALLHEADERS+=cds_stack.h cds_dl_list.h cds_queue.h cds_bs_tree.h
+INSTALLHEADERS+=cds_bst_map.h
 
 # Compiler and archiver executable names
 AR=ar
