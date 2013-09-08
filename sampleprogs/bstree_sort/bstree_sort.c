@@ -56,7 +56,7 @@ int main(int argc, char ** argv) {
 
     /*  Print sorted input via inorder left traverse of tree  */
 
-    bst_inorder_left_traverse(tree, print_node, &line);
+    bs_tree_inorder_left_traverse(tree, print_node, &line);
 
     /*  Free tree and close file  */
 
