@@ -31,6 +31,7 @@ void stack_free(stack stk);
 size_t stack_length(const stack stk);
 bool stack_isempty(const stack stk);
 void * stack_pop(stack stk);
+void * stack_peek(stack stk);
 void stack_push(stack stk, void * data);
 
 void stack_lock(stack stk);

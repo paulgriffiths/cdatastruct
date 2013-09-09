@@ -79,6 +79,20 @@ void * stack_pop(stack stk) {
 
 
 /*!
+ * \brief           Peeks at the data for the top element of the stack.
+ * \details         The top item is not popped from the stack, and the
+ * user should not `free()` the pointer from this function.
+ * \param stk       A pointer to the stack.
+ * \returns         A `void` pointer to the popped data item.
+ */
+
+void * stack_peek(stack stk) {
+    sl_list_itr peek_node = sl_list_first(stk);
+    return peek_node->data;
+}
+
+
+/*!
  * \brief           Pushes a data item onto the stack.
  * \details         The provided pointer should point to dynamically
  * allocated memory.
