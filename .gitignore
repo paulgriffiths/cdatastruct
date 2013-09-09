@@ -25,3 +25,6 @@ latex
 
 # Backup files
 *~
+
+# Vi tags file
+tags
