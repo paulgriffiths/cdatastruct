@@ -20,6 +20,8 @@
 #include "cds_queue.h"
 #include "cds_bs_tree.h"
 #include "cds_bst_map.h"
+#include "cds_ia_stack.h"
+#include "cds_da_stack.h"
 
 
 #endif          /*  PG_C_DATA_STRUCTURES_H  */

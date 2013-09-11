@@ -49,6 +49,7 @@ LD_TEST_FLAGS+=-l$(LIBNAME) -L$(CURDIR) -lchelpers
 
 # Object code files
 OBJS=general.o sl_list.o dl_list.o stack.o queue.o bs_tree.o bst_map.o
+OBJS+=ia_stack.o da_stack.o
 
 TESTOBJS=tests/test_main.o
 TESTOBJS+=tests/test_sl_list.o
@@ -136,6 +137,10 @@ lint:
 linteasy:
 	@splint -weak +unix-lib -unrecog $(SRCGLOB)
 
+# tags - makes tags file
+.PHONY: tags
+tags:
+	@ctags *.c *.h
 
 # Executable targets section
 # ==========================
@@ -190,6 +195,15 @@ bs_tree.o: bs_tree.c cds_bs_tree.h bs_tree.h cds_common.h
 bst_map.o: bst_map.c cds_bst_map.h cds_common.h
 	@echo "Compiling $<..."
 	@$(CC) $(CFLAGS) -c -o $@ $<
+
+ia_stack.o: ia_stack.c cds_ia_stack.h
+	@echo "Compiling $<..."
+	@$(CC) $(CFLAGS) -c -o $@ $<
+
+da_stack.o: da_stack.c cds_da_stack.h
+	@echo "Compiling $<..."
+	@$(CC) $(CFLAGS) -c -o $@ $<
+
 
 # Unit tests
 
