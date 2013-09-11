@@ -128,51 +128,47 @@ void infix_to_postfix(dl_list list) {
 
 double evaluate_postfix(const dl_list list) {
     dl_list_itr itr = dl_list_first(list);
-    stack stk = stack_init(NULL);
+    da_stack stk = da_stack_init(dl_list_length(list));
 
     while ( itr ) {
         token_t * op_token = itr->data;
 
         if ( op_token->type == TOK_NUMBER ) {
-            stack_push(stk, cds_new_double(op_token->value));
+            da_stack_push(stk, op_token->value);
         } else {
-            double * operands[2] = {stack_pop(stk), stack_pop(stk)};
+            double operands[2] = {da_stack_pop(stk), da_stack_pop(stk)};
             double result;
 
             switch ( op_token->type ) {
                 case TOK_ADDITION:
-                    result = *operands[1] + *operands[0];
+                    result = operands[1] + operands[0];
                     break;
 
                 case TOK_SUBTRACTION:
-                    result = *operands[1] - *operands[0];
+                    result = operands[1] - operands[0];
                     break;
 
                 case TOK_MULTIPLICATION:
-                    result = *operands[1] * *operands[0];
+                    result = operands[1] * operands[0];
                     break;
 
                 case TOK_DIVISION:
-                    result = *operands[1] / *operands[0];
+                    result = operands[1] / operands[0];
                     break;
 
                 default:
                     assert(false);
             }
 
-            free(operands[0]);
-            free(operands[1]);
-            stack_push(stk, cds_new_double(result));
+            da_stack_push(stk, result);
         }
 
         itr = dl_list_next(itr);
     }
 
-    double * p_result = stack_pop(stk);
-    double result = *p_result;
+    double result = da_stack_pop(stk);
 
-    free(p_result);
-    stack_free(stk);
+    da_stack_free(stk);
 
     return result;
 }
